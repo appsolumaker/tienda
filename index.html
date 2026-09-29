@@ -60,14 +60,18 @@ main{max-width:1120px;margin:0 auto;padding:16px 16px 40px}
 @media(min-width:920px){.rejilla{grid-template-columns:repeat(4,1fr)}}
 
 .card{background:var(--carta);border:1px solid var(--linea);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
-.card.sin{opacity:.66}
+.card.sin{background:#FAFBFC}
+.card.sin .foto-caja img{filter:grayscale(1);opacity:.45}
+.card.sin .nom,.card.sin .cod{color:var(--texto-2)}
+.card.sin .precio{color:var(--texto-2);font-weight:700}
+.card.sin .bs{opacity:.7}
 .foto-caja{position:relative;background:var(--foto);aspect-ratio:1/1;overflow:hidden}
 .foto-caja img{width:100%;height:100%;object-fit:contain;display:block}
 .sinfoto{width:100%;height:100%;display:grid;place-items:center;color:var(--texto-2);font-size:11px;text-align:center;padding:10px}
 .etq{position:absolute;top:9px;left:9px;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:999px;
   background:var(--carta);color:var(--texto-2);border:1px solid var(--linea)}
 .etq.poco{background:#FFF6DB;color:#8A6400;border-color:#FFE9A8}
-.etq.no{color:var(--rojo)}
+.etq.no{background:#FDEDEA;color:var(--rojo);border-color:#F7C9C1;font-weight:800}
 .card-b{padding:12px;display:flex;flex-direction:column;gap:4px;flex:1}
 .cod{font-size:10.5px;color:var(--texto-2);font-weight:500}
 .nom{font-size:13.5px;font-weight:500;line-height:1.35;margin:0;min-height:36px;
