@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es-VE" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prueba de subida de fotos</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --azul:#1B45E0;--fondo:#F7F8FB;--carta:#FFF;--texto:#12172B;--texto-2:#6B7490;--linea:#E9ECF3;--verde:#1F9D55;--rojo:#E23D28}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--texto);font-family:Poppins,system-ui,sans-serif;font-size:14.5px;line-height:1.5}
+.wrap{max-width:560px;margin:0 auto;padding:22px 16px 60px}
+h1{font-size:19px;font-weight:800;margin:0 0 4px}
+p.sub{color:var(--texto-2);font-size:13px;margin:0 0 20px}
+.caja{background:var(--carta);border:1px solid var(--linea);border-radius:16px;padding:16px;margin-bottom:14px}
+label{display:block;font-size:12px;font-weight:600;margin-bottom:5px}
+input{width:100%;padding:11px 12px;border-radius:11px;border:1px solid var(--linea);background:var(--fondo);color:var(--texto);font-family:inherit;font-size:16px;margin-bottom:11px}
+input::placeholder{color:var(--texto-2);opacity:.75}
+button{width:100%;font-family:inherit;font-size:14px;font-weight:700;padding:13px;border-radius:12px;border:0;cursor:pointer;
+  background:var(--azul);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px}
+button:disabled{opacity:.6;cursor:not-allowed}
+.previews{display:flex;gap:12px;margin:12px 0}
+.prev{flex:1;text-align:center}
+.prev img{width:100%;border-radius:12px;border:1px solid var(--linea);background:#fff}
+.prev span{font-size:11px;color:var(--texto-2);display:block;margin-top:4px}
+.res{margin-top:14px;font-size:12.5px;word-break:break-all;padding:12px;border-radius:12px;display:none}
+.res.ok{display:block;background:#EAF7EF;color:#0D3D22}
+.res.mal{display:block;background:#FDEDEA;color:#8A2317}
+.sp{width:15px;height:15px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;display:inline-block;animation:g .7s linear infinite}
+@keyframes g{to{transform:rotate(360deg)}}
+code{background:var(--fondo);padding:1px 5px;border-radius:5px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Prueba de subida de fotos</h1>
+  <p class="sub">Achica la imagen, la recorta en cuadrado, la convierte a WebP y la sube a R2.</p>
+
+  <div class="caja">
+    <label for="worker">Dirección del Worker</label>
+    <input id="worker" placeholder="https://subir-fotos.tucuenta.workers.dev">
+
+    <label for="cliente">Identificador del negocio</label>
+    <input id="cliente" placeholder="nuevodepaquete">
+
+    <label for="clave">Clave del negocio</label>
+    <input id="clave" placeholder="la que pusiste en CLAVES">
+
+    <label for="codigo">Código del producto</label>
+    <input id="codigo" placeholder="TEL-014">
+
+    <label for="archivo">Foto</label>
+    <input type="file" id="archivo" accept="image/*" onchange="preparar(this)">
+
+    <div class="previews" id="previews" style="display:none">
+      <div class="prev"><img id="pg"><span id="tg"></span></div>
+      <div class="prev"><img id="pm"><span id="tm"></span></div>
+    </div>
+
+    <button id="btn" onclick="subir()" disabled>Subir foto</button>
+    <div class="res" id="res"></div>
+  </div>
+
+  <p class="sub">Guarda esta página en el repositorio <code>tienda</code> como <code>prueba-fotos.html</code>.</p>
+</div>
+
+<script>
+let GRANDE = null, MINI = null;
+
+// Recorta al centro en cuadrado, escala al tamaño pedido y devuelve WebP.
+function procesar(img, lado, calidad){
+  const min = Math.min(img.width, img.height);
+  const sx  = (img.width  - min) / 2;
+  const sy  = (img.height - min) / 2;
+  const c   = document.createElement("canvas");
+  c.width = lado; c.height = lado;
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillRect(0, 0, lado, lado);
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(img, sx, sy, min, min, 0, 0, lado, lado);
+  return c.toDataURL("image/webp", calidad);
+}
+
+function peso(dataUrl){
+  const b64 = dataUrl.slice(dataUrl.indexOf(",") + 1);
+  return Math.round(b64.length * 0.75 / 1024);
+}
+
+function preparar(input){
+  const f = input.files && input.files[0];
+  if(!f) return;
+  const btn = document.getElementById("btn");
+  btn.disabled = true;
+  const img = new Image();
+  img.onload = () => {
+    GRANDE = procesar(img, 900, 0.82);
+    MINI   = procesar(img, 400, 0.80);
+    document.getElementById("pg").src = GRANDE;
+    document.getElementById("pm").src = MINI;
+    document.getElementById("tg").textContent = "900 px · " + peso(GRANDE) + " KB";
+    document.getElementById("tm").textContent = "400 px · " + peso(MINI) + " KB";
+    document.getElementById("previews").style.display = "flex";
+    btn.disabled = false;
+    URL.revokeObjectURL(img.src);
+  };
+  img.onerror = () => mostrar(false, "No se pudo leer el archivo. ¿Seguro que es una imagen?");
+  img.src = URL.createObjectURL(f);
+}
+
+function mostrar(ok, html){
+  const r = document.getElementById("res");
+  r.className = "res " + (ok ? "ok" : "mal");
+  r.innerHTML = html;
+}
+
+async function subir(){
+  const btn = document.getElementById("btn");
+  const worker = document.getElementById("worker").value.trim().replace(/\/+$/,"");
+  const cuerpo = {
+    cliente: document.getElementById("cliente").value.trim(),
+    clave:   document.getElementById("clave").value.trim(),
+    codigo:  document.getElementById("codigo").value.trim(),
+    grande:  GRANDE, mini: MINI
+  };
+  if(!worker || !cuerpo.cliente || !cuerpo.clave || !cuerpo.codigo || !GRANDE){
+    mostrar(false, "Faltan datos por llenar."); return;
+  }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="sp"></span> Subiendo…';
+  try{
+    const r = await fetch(worker, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(cuerpo)
+    });
+    const d = await r.json();
+    if(d.ok) mostrar(true, "<b>Listo.</b><br><br>Grande:<br>" + d.grande + "<br><br>Miniatura:<br>" + d.mini);
+    else     mostrar(false, "<b>No se subió.</b><br>" + (d.msg || "Error desconocido."));
+  }catch(e){
+    mostrar(false, "<b>No se pudo conectar con el Worker.</b><br>Revisa la dirección y que esté desplegado.");
+  }finally{
+    btn.disabled = false;
+    btn.textContent = "Subir foto";
+  }
+}
+</script>
+</body>
+</html>
