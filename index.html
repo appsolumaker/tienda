@@ -29,10 +29,7 @@ window.TIENDA = {
                          //                  estilo:"suave", fuente:"Nunito", encabezado:"color" }
                          //   estilo: suave · recto · pastilla   ·   encabezado: claro · color
                          //   fuente: Poppins · Montserrat · Nunito · Barlow · Archivo · Roboto · Lora
-  frase:    "",          // franja bajo el logo. Ej: "Delivery en Maracay. Lunes a sábado de 8 a. m. a 6 p. m."
-  banners:  [],          // promociones. Cada una: { titulo, texto, imagen (URL, opcional), mensaje (texto para WhatsApp) }
-                         //   Ej: [{ titulo:"Combo parrillero", texto:"Carbón, 2 kg de carne y salsas", imagen:"",
-                         //          mensaje:"Hola, quiero información del combo parrillero" }]
+  // La frase, las promociones y las formas de entrega se manejan en ControlMaster → Configuración → Tienda online.
   nombres:  "titulo",    // "titulo" = Aceite La Pampa 500 ml · "original" = como está en el inventario
   agotados: "final"      // "final" = al final de la lista · "ocultar" · "normal"
 };
@@ -183,17 +180,11 @@ main{max-width:1120px;margin:0 auto;padding:18px 16px 40px}
 .promos-pista{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding-bottom:2px}
 .promos-pista::-webkit-scrollbar{display:none}
 .promo{flex:0 0 88%;scroll-snap-align:start;position:relative;overflow:hidden;border-radius:var(--radio);
-  min-height:168px;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;padding:22px 20px;text-align:left;
-  background:var(--pri);color:var(--pri-texto)}
+  aspect-ratio:2/1;background:var(--foto);padding:0;display:block;border:0}
+.promo img{width:100%;height:100%;object-fit:cover;display:block}
+.promo.fija{cursor:default}
 .promos.una .promo{flex-basis:100%}
-@media(min-width:720px){.promo{flex-basis:calc(50% - 6px);min-height:200px;padding:26px 26px}.promos.una .promo{min-height:220px}}
-.promo.con-foto{color:#FFFFFF;background:#222 center/cover no-repeat}
-.promo.con-foto::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 25%,rgba(0,0,0,.72) 100%)}
-.promo > *{position:relative}
-.promo-tit{font-size:clamp(22px,4.2vw,32px);font-weight:800;line-height:1.08;letter-spacing:-.5px;margin:0;max-width:22ch}
-.promo-txt{font-size:14px;opacity:.92;margin:0;max-width:40ch}
-.promo-cta{align-self:flex-start;margin-top:8px;background:var(--acento);color:var(--acento-texto);font-weight:800;font-size:13px;
-  padding:8px 14px;border-radius:var(--radio-chip)}
+@media(min-width:720px){.promo{flex-basis:calc(50% - 6px)}.promos.una .promo{flex-basis:100%;max-height:340px}}
 .promos-puntos{display:flex;justify-content:center;gap:6px;margin-top:10px}
 .promos-puntos span{width:7px;height:7px;border-radius:50%;background:var(--linea);transition:background .2s}
 .promos-puntos span.on{background:var(--pri)}
@@ -294,7 +285,7 @@ body.con-barra footer .foot-in{padding-bottom:calc(96px + env(safe-area-inset-bo
 .m-cuerpo{padding:20px}
 .m-cuerpo h3{font-size:18px;font-weight:800;margin:0 0 6px;letter-spacing:-.3px}
 .m-cuerpo p{margin:0 0 14px;color:var(--texto-2);font-size:13.5px;line-height:1.5}
-.m-foto{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;border-radius:20px 20px 0 0;background:var(--foto)}
+.m-foto{width:100%;aspect-ratio:2/1;object-fit:cover;display:block;border-radius:20px 20px 0 0;background:var(--foto)}
 .m-foto[hidden]{display:none}
 .campo{margin-bottom:11px}
 .campo label{display:block;font-size:12.5px;font-weight:600;margin-bottom:5px}
@@ -304,6 +295,32 @@ body.con-barra footer .foot-in{padding-bottom:calc(96px + env(safe-area-inset-bo
 .fila .campo{flex:1}
 .ci{display:flex;gap:8px}
 .ci select{width:74px;flex:0 0 auto}
+.m-sub{margin:-2px 0 14px !important}
+.opc{font-weight:500;color:var(--texto-2)}
+.campo textarea{width:100%;padding:11px 12px;border-radius:11px;border:1px solid var(--linea);background:var(--fondo);
+  color:var(--texto);font-family:inherit;font-size:16px;min-height:64px;resize:vertical}
+.campo textarea::placeholder{color:var(--texto-2);opacity:.75}
+.et{display:block;font-size:12.5px;font-weight:600;margin:4px 0 6px}
+.opciones{display:grid;gap:8px}
+.opcion{position:relative;display:block;cursor:pointer}
+.campo label.opcion,.campo label.agencia{font-weight:400;font-size:inherit;margin:0}
+.opcion input{position:absolute;opacity:0;width:1px;height:1px}
+.opcion > span{display:grid;grid-template-columns:20px 1fr;gap:2px 10px;align-items:start;padding:11px 12px;
+  border:1px solid var(--linea);border-radius:12px;background:var(--fondo)}
+.opcion .punto{grid-row:span 2;width:20px;height:20px;border-radius:50%;border:2px solid #9AA2B5;background:#fff;margin-top:1px}
+.opcion b{font-size:14px;line-height:1.3}
+.opcion small{font-size:12.5px;color:var(--texto-2);line-height:1.35}
+.opcion input:checked + span{border-color:var(--pri);background:var(--carta);box-shadow:0 0 0 3px var(--pri-suave)}
+.opcion input:checked + span .punto{border:6px solid var(--pri)}
+.opcion input:focus-visible + span{outline:2px solid var(--pri);outline-offset:2px}
+.agencias{display:flex;flex-wrap:wrap;gap:8px}
+.agencia{position:relative;cursor:pointer}
+.agencia input{position:absolute;opacity:0;width:1px;height:1px}
+.agencia span{display:block;padding:9px 16px;border:1px solid var(--linea);border-radius:var(--radio-chip);background:var(--fondo);font-weight:700;font-size:13.5px}
+.agencia input:checked + span{background:var(--pri);border-color:var(--pri);color:var(--pri-texto)}
+.agencia input:focus-visible + span{outline:2px solid var(--pri);outline-offset:2px}
+.cond{border-top:1px dashed var(--linea);margin-top:11px;padding-top:11px}
+.campo.mal input,.campo.mal select,.campo.mal textarea,.campo.mal .opcion > span,.campo.mal .agencia span{border-color:var(--rojo)}
 .err{color:var(--rojo);font-size:12.5px;margin:2px 0 10px;display:none;line-height:1.4}
 .err.on{display:block}
 .btn-pri{width:100%;background:var(--pri);color:var(--pri-texto);font-weight:800;padding:13px;border-radius:var(--radio-btn);
@@ -361,12 +378,9 @@ body.con-barra footer .foot-in{padding-bottom:calc(96px + env(safe-area-inset-bo
 </script>
 
 <div class="franja"><div class="franja-in">
-  <span class="frase" id="frase"></span>
+  <span class="frase" id="frase" hidden></span>
   <span>Tasa BCV: <b id="tasaTxt">—</b> Bs/$</span>
 </div></div>
-<script>
-(function(){ var f = document.getElementById("frase"); var t = window.TIENDA.frase; if (t) f.textContent = t; else f.remove(); })();
-</script>
 
 <div class="controles">
   <div class="controles-in">
@@ -413,19 +427,37 @@ body.con-barra footer .foot-in{padding-bottom:calc(96px + env(safe-area-inset-bo
 <div class="modal" id="mDatos" role="dialog" aria-label="Tus datos">
   <div class="m-cuerpo">
     <h3>Solo faltan tus datos</h3>
+    <p class="m-sub">Quedan guardados en este teléfono para tu próximo pedido.</p>
     <div class="fila">
-      <div class="campo"><label for="f_nom">Nombre</label><input id="f_nom" placeholder="Ej: María" autocomplete="given-name"></div>
-      <div class="campo"><label for="f_ape">Apellido</label><input id="f_ape" placeholder="Ej: Pérez" autocomplete="family-name"></div>
+      <div class="campo" id="c_nom"><label for="f_nom">Nombre</label><input id="f_nom" placeholder="Ej: María" autocomplete="given-name" maxlength="40"></div>
+      <div class="campo" id="c_ape"><label for="f_ape">Apellido</label><input id="f_ape" placeholder="Ej: Pérez" autocomplete="family-name" maxlength="40"></div>
     </div>
-    <div class="campo">
+    <div class="campo" id="c_ci">
       <label for="f_ci">Cédula</label>
       <div class="ci">
         <select id="f_tipo"><option>V</option><option>E</option><option>J</option></select>
-        <input id="f_ci" inputmode="numeric" placeholder="12345678">
+        <input id="f_ci" inputmode="numeric" placeholder="Solo números" maxlength="10">
       </div>
     </div>
-    <div class="campo"><label for="f_tel">Teléfono (WhatsApp)</label><input id="f_tel" inputmode="tel" placeholder="0414 1234567" autocomplete="tel"></div>
-    <div class="campo"><label for="f_dir">Ciudad o zona de entrega</label><input id="f_dir" placeholder="Ej: Maracay, Base Aragua"></div>
+    <div class="campo" id="c_tel"><label for="f_tel">Teléfono (WhatsApp)</label><input id="f_tel" type="tel" inputmode="numeric" placeholder="0414-1234567" autocomplete="tel" maxlength="12"></div>
+    <div class="campo" id="c_correo"><label for="f_correo">Correo <span class="opc">(opcional)</span></label><input id="f_correo" type="email" inputmode="email" placeholder="Para recibir la confirmación" autocomplete="email" maxlength="100"></div>
+
+    <div class="campo" id="c_entrega" hidden>
+      <span class="et" id="etEntrega">¿Cómo quieres recibir tu pedido?</span>
+      <div class="opciones" id="opcEntrega" role="radiogroup" aria-labelledby="etEntrega"></div>
+    </div>
+    <div class="cond" id="bqDelivery" hidden>
+      <div class="campo" id="c_dir"><label for="f_dirE">Dirección exacta</label><textarea id="f_dirE" maxlength="300" placeholder="Sector o urbanización, calle, casa o edificio"></textarea></div>
+      <div class="campo" id="c_ref"><label for="f_ref">Punto de referencia</label><input id="f_ref" maxlength="200" placeholder="Ej: Frente a la plaza, portón negro"></div>
+    </div>
+    <div class="cond" id="bqNacional" hidden>
+      <div class="campo" id="c_ag"><span class="et" id="etAgencia">Agencia</span><div class="agencias" id="opcAgencia" role="radiogroup" aria-labelledby="etAgencia"></div></div>
+      <div class="campo" id="c_edo"><label for="f_edo">Estado</label><select id="f_edo"><option value="">Selecciona tu estado</option></select></div>
+      <div class="campo" id="c_ciu"><label for="f_ciu">Ciudad</label><input id="f_ciu" maxlength="60" placeholder="Ej: Barquisimeto" autocomplete="address-level2"></div>
+      <div class="campo" id="c_ofi"><label for="f_ofi">Dirección de la oficina donde retiras</label><textarea id="f_ofi" maxlength="300" placeholder="Ej: Av. Lara con calle 60, C.C. Churun Meru, local 12"></textarea></div>
+    </div>
+    <div class="campo" id="c_libre" hidden><label for="f_dir">Ciudad o zona de entrega</label><input id="f_dir" maxlength="120" placeholder="Ej: Maracay, Base Aragua"></div>
+
     <div class="err" id="errDatos"></div>
     <button class="btn-wa" id="btnEnviar" onclick="enviarPedido()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2zm0 18a8 8 0 01-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1112 20zm4.4-5.8c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 01-3.2-2.8c-.1-.2 0-.4.1-.5l.4-.5c.1-.2.1-.3 0-.5l-.7-1.6c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3a2.9 2.9 0 00-.9 2.1c0 1.3.9 2.5 1 2.6a10 10 0 003.9 3.4c1.8.7 1.8.5 2.2.5.3 0 1.2-.5 1.4-1 .2-.5.2-.9.1-1z"/></svg>
@@ -521,41 +553,52 @@ function pintarNombre(){
 }
 
 // ══════════ PROMOCIONES ══════════
+// Llegan con el catálogo (Configuración → Tienda online). Sin imagen no hay promoción;
+// sin WhatsApp la promoción es solo informativa (no se puede tocar).
+let PROMOS = [];
+function hoyCaracas(){
+  try { return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Caracas" }).format(new Date()); }
+  catch(e) { return new Date().toISOString().slice(0, 10); }
+}
 function pintarPromos(){
-  const lista = Array.isArray(T.banners) ? T.banners.filter(b => b && (b.titulo || b.imagen)) : [];
-  if (!lista.length) return;
+  const hoy = hoyCaracas();
+  const lista = ((CAT && CAT.tienda && CAT.tienda.banners) || []).filter(b => b && b.img && (!b.hasta || b.hasta >= hoy));
   const sec = $("promos"), pista = $("promosPista"), puntos = $("promosPuntos");
+  const firma = JSON.stringify(lista);
+  if (sec.dataset.firma === firma) return;            // nada cambió: no se repinta (no salta el carrusel)
+  sec.dataset.firma = firma;
+  PROMOS = lista;
+  if (!lista.length){ sec.hidden = true; pista.innerHTML = ""; puntos.innerHTML = ""; return; }
   sec.hidden = false;
   sec.classList.toggle("una", lista.length === 1);
   pista.innerHTML = lista.map((b, i) => {
-    const foto = b.imagen ? ' con-foto" style="background-image:url(\'' + esc(b.imagen).replace(/'/g, "%27") + '\')' : '"';
-    return '<button class="promo' + foto + ' data-i="' + i + '" aria-label="' + esc(b.titulo || "Promoción") + '">' +
-      (b.titulo ? '<h2 class="promo-tit">' + esc(b.titulo) + '</h2>' : "") +
-      (b.texto ? '<p class="promo-txt">' + esc(b.texto) + '</p>' : "") +
-      '<span class="promo-cta">' + esc(b.boton || "Pedir información") + '</span></button>';
+    const img = '<img src="' + esc(b.img) + '" alt="Promoción ' + (i + 1) + '"' + (i > 1 ? ' loading="lazy"' : '') + ' decoding="async">';
+    return b.wa ? '<button class="promo" data-i="' + i + '" aria-label="Ver promoción ' + (i + 1) + '">' + img + '</button>'
+                : '<div class="promo fija">' + img + '</div>';
   }).join("");
   puntos.innerHTML = lista.length > 1 ? lista.map((_, i) => '<span' + (i === 0 ? ' class="on"' : '') + '></span>').join("") : "";
-  pista.addEventListener("click", e => { const b = e.target.closest(".promo"); if (b) abrirPromo(lista[Number(b.dataset.i)]); });
-  if (lista.length > 1){
-    pista.addEventListener("scroll", () => {
-      const ancho = pista.firstElementChild.getBoundingClientRect().width + 12;
-      const i = Math.min(lista.length - 1, Math.round(pista.scrollLeft / ancho));
-      [...puntos.children].forEach((s, k) => s.classList.toggle("on", k === i));
-    }, { passive: true });
-  }
+  pista.scrollLeft = 0;
 }
+$("promosPista").addEventListener("click", e => {
+  const b = e.target.closest("button.promo");
+  if (b && PROMOS[Number(b.dataset.i)]) abrirPromo(PROMOS[Number(b.dataset.i)]);
+});
+$("promosPista").addEventListener("scroll", () => {
+  const pista = $("promosPista"), puntos = $("promosPuntos");
+  if (PROMOS.length < 2 || !pista.firstElementChild) return;
+  const ancho = pista.firstElementChild.getBoundingClientRect().width + 12;
+  const i = Math.min(PROMOS.length - 1, Math.round(pista.scrollLeft / ancho));
+  [...puntos.children].forEach((s, k) => s.classList.toggle("on", k === i));
+}, { passive: true });
 function abrirPromo(b){
   const foto = $("promoFoto");
-  if (b.imagen){ foto.src = b.imagen; foto.alt = b.titulo || ""; foto.hidden = false; } else foto.hidden = true;
-  $("promoTit").textContent = b.titulo || "Promoción";
-  $("promoTxt").textContent = b.texto || "";
-  $("promoTxt").style.display = b.texto ? "" : "none";
-  const wa = numeroWhatsApp();
-  const msj = b.mensaje || ("Hola, quiero información sobre: " + (b.titulo || "la promoción") + ".");
-  if (wa){
-    $("promoWa").href = "https://wa.me/" + wa + "?text=" + encodeURIComponent(msj);
-    $("promoWa").style.display = "flex"; $("promoSinWa").style.display = "none";
-  } else { $("promoWa").style.display = "none"; $("promoSinWa").style.display = "block"; }
+  foto.src = b.img; foto.alt = "Promoción"; foto.hidden = false;
+  $("promoTit").textContent = "¿Te interesa esta promoción?";
+  $("promoTxt").textContent = "Escríbenos por WhatsApp y te damos todos los detalles.";
+  $("promoTxt").style.display = "";
+  const msj = b.msg || "Hola, vi esta promoción en la tienda y quiero más información.";
+  $("promoWa").href = "https://wa.me/" + b.wa + "?text=" + encodeURIComponent(msj);
+  $("promoWa").style.display = "flex"; $("promoSinWa").style.display = "none";
   $("mPromo").classList.add("on");
   $("velo").classList.add("on");
 }
@@ -565,7 +608,6 @@ function abrirPromo(b){
 // 2) Se pide el catálogo nuevo: primero la copia rápida (R2) y, si no existe, el /exec.
 // 3) Si cambió, se repinta sin perder la búsqueda, la categoría ni el carrito.
 async function cargar(){
-  pintarPromos();
   if (!T.catalogoRapido && !T.sistema){
     mostrarEstado("<b>Falta indicar la tienda</b>Llena el bloque TIENDA al inicio del archivo, o agrega <code>?c=</code> y <code>?s=</code> al enlace.");
     return;
@@ -614,6 +656,9 @@ function aplicarCatalogo(d){
 
   pintarNombre();
   $("tasaTxt").textContent = usd(d.tasa || 0);
+  const fr = $("frase"), frase = (d.tienda && d.tienda.frase) || "";
+  fr.textContent = frase; fr.hidden = !frase;
+  pintarPromos();
 
   const visibles = T.agotados === "ocultar" ? CAT.productos.filter(p => p.e !== 0) : CAT.productos;
   const cats = (d.categorias || []).filter(c => c && visibles.some(p => p.g === c));
@@ -868,16 +913,122 @@ function pedirDatos(){
   }
   $("gaveta").classList.remove("on");
   $("errDatos").classList.remove("on");
+  limpiarErroresDatos();
+  let g = null;
+  try { g = JSON.parse(localStorage.getItem("cm_cliente") || "null"); } catch(e) {}
+  if (g){
+    const e = g.env || {};
+    $("f_nom").value = g.nom || ""; $("f_ape").value = g.ape || ""; $("f_tipo").value = g.tipo || "V";
+    $("f_ci").value = g.ci || "";   $("f_tel").value = formatoTel(g.tel || ""); $("f_correo").value = g.correo || "";
+    $("f_dir").value = g.libre || (g.env ? "" : (g.dir || ""));
+    $("f_dirE").value = e.tipo === "delivery" ? (e.direccion || "") : "";
+    $("f_ref").value  = e.tipo === "delivery" ? (e.referencia || "") : "";
+    $("f_edo").value  = e.tipo === "nacional" ? (e.estado || "") : "";
+    $("f_ciu").value  = e.tipo === "nacional" ? (e.ciudad || "") : "";
+    $("f_ofi").value  = e.tipo === "nacional" ? (e.oficina || "") : "";
+  }
+  prepararEntrega(g);
   $("mDatos").classList.add("on");
   $("velo").classList.add("on");
-  try {
-    const g = JSON.parse(localStorage.getItem("cm_cliente") || "null");
-    if (g){
-      $("f_nom").value = g.nom || ""; $("f_ape").value = g.ape || ""; $("f_tipo").value = g.tipo || "V";
-      $("f_ci").value = g.ci || "";   $("f_tel").value = g.tel || ""; $("f_dir").value = g.dir || "";
-    }
-  } catch(e) {}
 }
+
+// ══════════ FORMAS DE ENTREGA ══════════
+// Las configura cada tienda en ControlMaster (Configuración → Tienda online) y llegan con el catálogo.
+// Sin ninguna configurada, el comprador solo escribe su ciudad o zona (como antes).
+const ESTADOS_VE = ["Amazonas","Anzoátegui","Apure","Aragua","Barinas","Bolívar","Carabobo","Cojedes","Delta Amacuro",
+  "Distrito Capital","Falcón","Guárico","La Guaira","Lara","Mérida","Miranda","Monagas","Nueva Esparta","Portuguesa",
+  "Sucre","Táchira","Trujillo","Yaracuy","Zulia"];
+function entregaCfg(){ return (CAT && CAT.tienda && CAT.tienda.entrega) || {}; }
+function listaY(a){ return a.length < 2 ? (a[0] || "") : a.slice(0, -1).join(", ") + " o " + a[a.length - 1]; }
+function opcionesEntrega(){
+  const e = entregaCfg(), o = [], ags = e.agencias || [];
+  if (e.retiro)   o.push({ v: "retiro",   t: "Retiro en tienda", s: "Lo buscas en nuestra tienda." });
+  if (e.delivery) o.push({ v: "delivery", t: "Delivery" + (e.ciudad ? " en " + e.ciudad : ""), s: "Te lo llevamos a tu dirección." });
+  if (e.nacional && ags.length) o.push({ v: "nacional", t: "Envío nacional", s: "Por " + listaY(ags) + ". Retiras en la oficina de la agencia." });
+  return o;
+}
+function radioVal(nombre){ const r = document.querySelector('#mDatos input[name="' + nombre + '"]:checked'); return r ? r.value : ""; }
+function prepararEntrega(g){
+  const ops = opcionesEntrega(), ags = entregaCfg().agencias || [];
+  $("c_entrega").hidden = !ops.length;
+  $("c_libre").hidden = !!ops.length;
+  $("opcEntrega").innerHTML = ops.map(o =>
+    '<label class="opcion"><input type="radio" name="entrega" value="' + o.v + '"><span><i class="punto"></i><b>' +
+    esc(o.t) + '</b><small>' + esc(o.s) + '</small></span></label>').join("");
+  $("opcAgencia").innerHTML = ags.map(a =>
+    '<label class="agencia"><input type="radio" name="agencia" value="' + esc(a) + '"><span>' + esc(a) + '</span></label>').join("");
+  const e = (g && g.env) || {};
+  const tipo = ops.length === 1 ? ops[0].v : e.tipo;
+  document.querySelectorAll('#opcEntrega input').forEach(r => { r.checked = r.value === tipo; });
+  const ag = ags.length === 1 ? ags[0] : e.agencia;
+  document.querySelectorAll('#opcAgencia input').forEach(r => { r.checked = r.value === ag; });
+  verEntrega();
+}
+function verEntrega(){
+  const t = radioVal("entrega");
+  $("bqDelivery").hidden = t !== "delivery";
+  $("bqNacional").hidden = t !== "nacional";
+}
+function formatoTel(v){
+  let d = String(v || "").replace(/\D/g, "");
+  if (d.indexOf("58") === 0 && d.length > 10) d = "0" + d.slice(2);
+  if (d.charAt(0) === "4") d = "0" + d;
+  d = d.slice(0, 11);
+  return d.length > 4 ? d.slice(0, 4) + "-" + d.slice(4) : d;
+}
+function limpiarErroresDatos(){ document.querySelectorAll("#mDatos .campo.mal").forEach(c => c.classList.remove("mal")); }
+
+// Lee y revisa el formulario. Devuelve { d, fallas: [[idDelCampo, mensaje], …] }
+function leerDatos(){
+  const v = id => $(id).value.trim().replace(/\s+/g, " ");
+  const d = { nom: v("f_nom"), ape: v("f_ape"), tipo: $("f_tipo").value, ci: $("f_ci").value.replace(/\D/g, ""),
+              tel: v("f_tel"), correo: v("f_correo").toLowerCase(), env: null, libre: "", dir: "" };
+  const f = [];
+  if (!d.nom) f.push(["c_nom", "Escribe tu nombre."]);
+  else if (/\d/.test(d.nom)) f.push(["c_nom", "El nombre no debe llevar números."]);
+  if (!d.ape) f.push(["c_ape", "Escribe tu apellido."]);
+  else if (/\d/.test(d.ape)) f.push(["c_ape", "El apellido no debe llevar números."]);
+  if (d.ci.length < 6 || d.ci.length > 10) f.push(["c_ci", "La cédula debe tener entre 6 y 10 dígitos, sin puntos ni letras."]);
+  if (!/^04\d{9}$/.test(d.tel.replace(/\D/g, ""))) f.push(["c_tel", "El teléfono debe ser un celular con el formato 0414-1234567."]);
+  if (d.correo && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.correo)) f.push(["c_correo", "Ese correo no parece válido. Revísalo o déjalo vacío."]);
+
+  const e = entregaCfg();
+  if (!opcionesEntrega().length){
+    d.libre = v("f_dir"); d.dir = d.libre;
+    d.env = { tipo: "libre", direccion: d.libre };
+    if (!d.libre) f.push(["c_libre", "Indica tu ciudad o zona para coordinar la entrega."]);
+  } else {
+    const t = radioVal("entrega");
+    if (!t) f.push(["c_entrega", "Elige cómo quieres recibir tu pedido."]);
+    if (t === "retiro"){ d.env = { tipo: "retiro" }; d.dir = "Retiro en tienda"; }
+    if (t === "delivery"){
+      d.env = { tipo: "delivery", ciudad: e.ciudad || "", direccion: v("f_dirE"), referencia: v("f_ref") };
+      if (d.env.direccion.length < 10) f.push(["c_dir", "Escribe tu dirección completa: sector o urbanización, calle y casa o edificio."]);
+      if (d.env.referencia.length < 4) f.push(["c_ref", "Escribe un punto de referencia cercano a tu dirección."]);
+      d.dir = "Delivery" + (e.ciudad ? " en " + e.ciudad : "") + ": " + d.env.direccion + (d.env.referencia ? " (Ref: " + d.env.referencia + ")" : "");
+    }
+    if (t === "nacional"){
+      d.env = { tipo: "nacional", agencia: radioVal("agencia"), estado: $("f_edo").value, ciudad: v("f_ciu"), oficina: v("f_ofi") };
+      if (!d.env.agencia) f.push(["c_ag", "Elige la agencia por la que quieres recibir."]);
+      if (!d.env.estado) f.push(["c_edo", "Selecciona el estado donde está la oficina de la agencia."]);
+      if (d.env.ciudad.length < 3) f.push(["c_ciu", "Escribe la ciudad donde está la oficina de la agencia."]);
+      if (d.env.oficina.length < 10) f.push(["c_ofi", "Escribe la dirección exacta de la oficina donde vas a retirar."]);
+      d.dir = "Envío nacional por " + (d.env.agencia || "agencia") + ": oficina " + d.env.oficina + ", " + d.env.ciudad + ", " + d.env.estado;
+    }
+  }
+  return { d: d, fallas: f };
+}
+
+(function iniciarFormulario(){
+  const sel = $("f_edo");
+  ESTADOS_VE.forEach(x => sel.add(new Option(x, x)));
+  $("opcEntrega").addEventListener("change", verEntrega);
+  $("f_tel").addEventListener("input", e => { e.target.value = formatoTel(e.target.value); });
+  $("f_ci").addEventListener("input", e => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10); });
+  const quitar = e => { const c = e.target.closest(".campo"); if (c) c.classList.remove("mal"); };
+  $("mDatos").addEventListener("input", quitar);
+  $("mDatos").addEventListener("change", quitar);
+})();
 
 // Referencia del pedido: número de 7 dígitos que sale en WhatsApp, en la hoja Pedidos y en la orden de la caja.
 function nuevaRef(){
@@ -908,23 +1059,37 @@ function textoWhatsApp(ref, d, lineas, total, tasa, totalBs){
   t += "💱 *Tasa BCV:* " + usd(tasa) + "\n";
   t += "💰 *Total Bs:* " + usd(totalBs) + "\n\n";
   t += "👤 *Cliente:* " + d.nom + " " + d.ape + " · " + d.tipo + "-" + d.ci + "\n";
-  if (d.dir) t += "📍 *Entrega:* " + d.dir + "\n";
+  t += lineasEntrega(d);
   t += "\nQuedo atento para coordinar el pago y la entrega. ¡Gracias!";
   return t;
+}
+
+function lineasEntrega(d){
+  const e = d.env || {};
+  if (e.tipo === "retiro")   return "🏪 *Entrega:* Retiro en tienda\n";
+  if (e.tipo === "delivery") return "📍 *Delivery" + (e.ciudad ? " en " + e.ciudad : "") + ":* " + e.direccion + "\n" +
+                                    (e.referencia ? "📌 *Referencia:* " + e.referencia + "\n" : "");
+  if (e.tipo === "nacional") return "🚚 *Envío por " + e.agencia + ":* " + e.ciudad + ", " + e.estado + "\n" +
+                                    "🏢 *Oficina:* " + e.oficina + "\n";
+  return d.dir ? "📍 *Entrega:* " + d.dir + "\n" : "";
 }
 
 function enviarPedido(){
   const btn = $("btnEnviar");
   if (btn.disabled) return;
   const err = $("errDatos");
-  const d = { nom: $("f_nom").value.trim(), ape: $("f_ape").value.trim(), tipo: $("f_tipo").value,
-              ci: $("f_ci").value.replace(/\D/g, ""), tel: $("f_tel").value.trim(), dir: $("f_dir").value.trim() };
-  let falla = "";
-  if (!d.nom || !d.ape) falla = "Escribe tu nombre y tu apellido para identificar el pedido.";
-  else if (d.ci.length < 6) falla = "La cédula debe tener al menos 6 dígitos, sin puntos ni guiones.";
-  else if (d.tel.replace(/\D/g, "").length < 10) falla = "El teléfono debe tener 11 dígitos, empezando por el código de la operadora.";
-  else if (!d.dir) falla = "Indica tu ciudad o zona para poder calcular el envío.";
-  if (falla){ err.textContent = falla; err.classList.add("on"); return; }
+  const leido = leerDatos(), d = leido.d, fallas = leido.fallas;
+  limpiarErroresDatos();
+  if (fallas.length){
+    fallas.forEach(x => $(x[0]).classList.add("mal"));
+    err.textContent = fallas[0][1] + (fallas.length > 1 ? " Hay " + (fallas.length - 1) + " dato" + (fallas.length > 2 ? "s" : "") + " más por revisar, marcado" + (fallas.length > 2 ? "s" : "") + " en rojo." : "");
+    err.classList.add("on");
+    const el = $(fallas[0][0]);
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    const foco = el.querySelector("input:not([type=radio]),select,textarea");
+    if (foco) setTimeout(() => foco.focus({ preventScroll: true }), 350);
+    return;
+  }
   err.classList.remove("on");
 
   const items = Object.entries(carrito).filter(([c]) => prod(c));
@@ -947,7 +1112,7 @@ function enviarPedido(){
   // 1) El pedido se guarda en este teléfono y se registra en ControlMaster por detrás.
   if (T.sistema){
     const pedido = { ref: ref, nombre: d.nom, apellido: d.ape, tipoDoc: d.tipo, cedula: d.ci,
-                     telefono: d.tel, entrega: d.dir, total: total,
+                     telefono: d.tel, entrega: d.dir, correo: d.correo, envio: d.env, sistema: T.sistema, total: total,
                      items: lineas.map(l => ({ c: l.c, q: l.q, n: prod(l.c).n, p: l.pu })) };  // al sistema va el nombre tal cual está en el inventario
     guardarPendiente(pedido);
     registrar(pedido);
@@ -1071,6 +1236,7 @@ function registrar(p){
   enVuelo[p.ref] = true;
   const cuerpo = JSON.stringify({ ref: p.ref, nombre: p.nombre, apellido: p.apellido, tipoDoc: p.tipoDoc,
                                   cedula: p.cedula, telefono: p.telefono, entrega: p.entrega,
+                                  correo: p.correo || "", envio: p.envio || null, sistema: p.sistema || T.sistema,
                                   total: p.total, items: p.items });
   fetch(T.sistema, {
     method: "POST",
