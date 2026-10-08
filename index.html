@@ -207,20 +207,22 @@ main{max-width:1120px;margin:0 auto;padding:18px 16px 40px}
 .card.sin .foto-caja img{filter:grayscale(1);opacity:.45}
 .card.sin .nom{color:var(--texto-2)}
 .card.sin .precio{color:var(--texto-2);font-weight:700}
-.foto-caja{position:relative;background:var(--foto);aspect-ratio:1/1;overflow:hidden}
-.foto-caja img{width:100%;height:100%;object-fit:contain;display:block}
-.sinfoto{width:100%;height:100%;display:grid;place-items:center;color:var(--texto-2);font-size:11px;text-align:center;padding:10px}
-.etq{position:absolute;top:9px;left:9px;font-size:11px;font-weight:700;padding:4px 9px;border-radius:var(--radio-chip);
+.foto-caja{position:relative;background:#FFFFFF;aspect-ratio:1/1;overflow:hidden;margin:8px 8px 0;
+  border:1px solid var(--linea);border-radius:max(4px, calc(var(--radio) - 6px))}
+@media(max-width:619px){.foto-caja{aspect-ratio:5/4}}
+.foto-caja img{width:100%;height:100%;object-fit:contain;display:block;padding:6px}
+.sinfoto{width:100%;height:100%;background:var(--foto);display:grid;place-items:center;color:var(--texto-2);font-size:11px;text-align:center;padding:10px}
+.etq{position:absolute;top:6px;left:6px;font-size:11px;font-weight:700;padding:4px 9px;border-radius:var(--radio-chip);
   background:var(--carta);color:var(--texto-2);border:1px solid var(--linea)}
 .etq.poco{background:#FFF4D6;color:#6B4E00;border-color:#EBCB7A}
 .etq.no{background:#FDECE8;color:var(--rojo);border-color:#F4C2B8}
-.card-b{padding:12px;display:flex;flex-direction:column;gap:3px;flex:1}
+.card-b{padding:10px 12px 12px;display:flex;flex-direction:column;gap:3px;flex:1}
 .nom{font-size:16px;font-weight:600;line-height:1.35;margin:0;min-height:43px;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .precio{font-weight:800;font-size:25px;line-height:1.15;letter-spacing:-.5px;margin-top:8px}
 .bs{font-size:16px;font-weight:700;color:var(--texto);opacity:.78;margin-top:1px}
 .card.sin .bs{font-weight:500}
-.accion{margin-top:12px;height:42px}
+.accion{margin-top:10px;height:42px}
 .add{width:100%;height:100%;background:var(--acento);color:var(--acento-texto);font-weight:800;border-radius:var(--radio-btn);
   display:flex;align-items:center;justify-content:center;gap:7px;font-size:14px}
 .add:disabled{background:var(--foto);color:var(--texto-2);cursor:not-allowed;font-weight:700}
