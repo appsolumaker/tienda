@@ -111,8 +111,7 @@ window.TIENDA = {
   R.setProperty("--anuncio-bg", anuncio);
   R.setProperty("--pie-bg", mezcla(pri, "#0B0D12", 0.86));
   R.setProperty("--busca-borde", colorTope ? "transparent" : "#D9DDE6");
-  R.setProperty("--nav-bg", colorTope ? suave : "#FFFFFF");
-  R.setProperty("--nav-activo", contraste(pri, colorTope ? suave : "#FFFFFF") >= 4.5 ? pri : OSCURO);
+  R.setProperty("--nav-bg", colorTope ? suave : fondo);
   var fuente = FUENTES[t.fuente] ? t.fuente : "Poppins";
   R.setProperty("--fuente", '"' + fuente + '"');
   var f = document.createElement("link"); f.rel = "stylesheet";
@@ -135,7 +134,7 @@ window.TIENDA = {
   --rojo:#D63A24; --wa:#25D366;
   --alto-tope:76px; --logo-alto:52px;
 }
-@media(max-width:899px){ :root{ --alto-tope:62px; --logo-alto:42px; } }
+@media(max-width:899px){ :root{ --alto-tope:62px; --logo-alto:36px; } }
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--fondo);color:var(--texto);
@@ -145,62 +144,70 @@ input,select{font-family:inherit;font-size:16px}
 :focus-visible{outline:2px solid var(--pri);outline-offset:2px;border-radius:8px}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 
-/* ── Barra de anuncio (la frase de la tienda) ── */
+/* ── Barra de anuncio: frase de la tienda, redes y tasa ── */
 .anuncio{background:var(--anuncio-bg);color:#FFFFFF;font-size:12.5px}
-.anuncio[hidden]{display:none}
-.anuncio-in{max-width:1180px;margin:0 auto;padding:7px 16px;min-height:32px;display:flex;align-items:center;justify-content:center;gap:16px}
+.anuncio-in{max-width:1180px;margin:0 auto;padding:6px 16px;min-height:30px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 18px}
 .anuncio .frase{font-weight:600;text-align:center;line-height:1.35}
+.anuncio .frase[hidden]{display:none}
+.anuncio-der{display:flex;align-items:center;gap:14px}
 .anuncio .redes{display:none}
-@media(min-width:900px){.anuncio-in{justify-content:space-between}.anuncio .frase{text-align:left}.anuncio .redes{display:flex}}
+.tasa-txt{opacity:.92;white-space:nowrap}
+.tasa-txt b{font-weight:800}
+@media(min-width:900px){
+  .anuncio-in{justify-content:space-between}
+  .anuncio .frase{text-align:left}
+  .anuncio .redes{display:flex}
+  .anuncio .redes:not([hidden]) + .tasa-txt{border-left:1px solid rgba(255,255,255,.25);padding-left:14px}
+}
 
-/* ── Encabezado ── */
-.tope{background:var(--tope-bg);color:var(--tope-texto)}
-@media(min-width:900px){.tope{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;box-shadow:0 1px 0 rgba(0,0,0,.07)}}
-.tope-in{max-width:1180px;margin:0 auto;padding:0 16px;height:var(--alto-tope);display:flex;align-items:center;gap:20px}
-.marca{display:flex;align-items:center;gap:12px;min-width:0;flex:0 1 auto;cursor:pointer}
-.logo{height:var(--logo-alto);width:auto;max-width:min(220px,40vw);object-fit:contain;display:block;flex:0 0 auto;border-radius:6px}
+/* ── Encabezado: logo · buscador · pedido ── */
+.tope{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:var(--tope-bg);color:var(--tope-texto);box-shadow:0 1px 0 rgba(0,0,0,.07)}
+.tope-in{max-width:1180px;margin:0 auto;padding:0 16px;height:var(--alto-tope);display:flex;align-items:center;gap:22px}
+@media(max-width:899px){.tope-in{gap:10px;padding:0 12px}}
+.marca{display:flex;align-items:center;gap:12px;min-width:0;flex:0 0 auto;cursor:pointer;max-width:34%}
+.logo{height:var(--logo-alto);width:auto;max-width:min(220px,26vw);object-fit:contain;display:block;flex:0 0 auto;border-radius:6px}
 .negocio{font-weight:800;font-size:19px;letter-spacing:-.3px;color:var(--tope-texto);min-width:0;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-@media(max-width:899px){.negocio{font-size:16px}.marca.con-logo .negocio{display:none}}
-.slot-pc{flex:1;display:none;justify-content:center;min-width:0}
-@media(min-width:900px){.slot-pc{display:flex}}
-.tope-acc{margin-left:auto;display:flex;align-items:center;gap:8px;flex:0 0 auto}
-.tasa{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15;padding:0 4px}
-.tasa small{font-size:10.5px;font-weight:600;opacity:.8;letter-spacing:.2px}
-.tasa b{font-size:15px;font-weight:800;letter-spacing:-.2px}
-.tope-wa{display:flex;align-items:center;gap:7px;color:var(--tope-texto);font-weight:700;font-size:13.5px;text-decoration:none;
-  padding:9px;border-radius:var(--radio-chip)}
-.tope-wa[hidden]{display:none}
-.tope-wa span{display:none}
-@media(min-width:900px){.tope-wa span{display:inline}}
-.btn-carrito{display:flex;align-items:center;gap:9px;background:var(--carrito-bg);color:var(--carrito-texto);
-  padding:10px 16px;border-radius:var(--radio-chip);font-weight:700;font-size:14px;flex:0 0 auto}
-.tot-carrito{display:none}
-.tot-carrito.on{display:inline}
-@media(max-width:620px){.tot-carrito.on{display:none}}
-.pill{background:var(--pill-bg);color:var(--pill-texto);border-radius:999px;min-width:22px;height:22px;
-  display:grid;place-items:center;font-size:12px;font-weight:800;padding:0 6px}
+@media(max-width:899px){.negocio{font-size:15px}.marca.con-logo .negocio{display:none}}
 
-/* ── Buscador y menú de categorías ── */
-.cats{position:sticky;top:env(safe-area-inset-top,0px);z-index:30}
-@media(min-width:900px){.cats{top:calc(env(safe-area-inset-top,0px) + var(--alto-tope))}}
-.slot-movil{background:var(--tope-bg);padding:0 16px 12px}
-@media(min-width:900px){.slot-movil{display:none}}
-.buscador{position:relative;display:flex;width:100%;max-width:640px;margin:0 auto}
-.buscador input{flex:1;min-width:0;height:46px;padding:0 14px 0 42px;border:1px solid var(--busca-borde);border-right:0;
+.buscador{position:relative;display:flex;flex:1;min-width:0;max-width:700px;margin:0 auto}
+.buscador input{flex:1;min-width:0;height:46px;padding:0 12px 0 42px;border:1px solid var(--busca-borde);border-right:0;
   border-radius:var(--radio-btn) 0 0 var(--radio-btn);background:#FFFFFF;color:#171A21;font-weight:500;-webkit-appearance:none;appearance:none}
 .buscador input::placeholder{color:#6B7280;font-weight:400}
 .buscador input::-webkit-search-cancel-button{display:none}
 .buscador .lupa{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#171A21;opacity:.45;pointer-events:none}
 .busca-btn{flex:0 0 52px;height:46px;border-radius:0 var(--radio-btn) var(--radio-btn) 0;background:var(--acento);color:var(--acento-texto);
   display:grid;place-items:center}
-.cats-lista{background:var(--nav-bg);border-bottom:1px solid var(--linea);box-shadow:0 1px 0 rgba(0,0,0,.02)}
-.cats-in{max-width:1180px;margin:0 auto;padding:0 6px}
-.chips{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+@media(max-width:899px){
+  .buscador input{height:42px;padding-left:36px;font-size:15px}
+  .buscador .lupa{left:11px}
+  .busca-btn{flex-basis:42px;height:42px}
+}
+
+.btn-carrito{display:flex;align-items:center;gap:18px;background:var(--carrito-bg);color:var(--carrito-texto);
+  padding:8px 18px 8px 14px;border-radius:var(--radio-btn);flex:0 0 auto;min-height:46px}
+.carro-ico{position:relative;display:grid;place-items:center}
+.carro-ico .pill{position:absolute;top:-9px;right:-10px;min-width:19px;height:19px;font-size:11px;padding:0 5px;box-shadow:0 0 0 2px var(--carrito-bg)}
+.carro-txt{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15;text-align:left}
+.carro-txt small{font-size:11px;font-weight:600;opacity:.85}
+.carro-txt b{font-size:15px;font-weight:800}
+@media(max-width:899px){
+  .btn-carrito{width:44px;height:42px;min-height:42px;padding:0;justify-content:center}
+  .carro-txt{display:none}
+}
+.pill{background:var(--pill-bg);color:var(--pill-texto);border-radius:999px;min-width:22px;height:22px;
+  display:grid;place-items:center;font-size:12px;font-weight:800;padding:0 6px}
+
+/* ── Menú de categorías: cada una en su botón ── */
+.cats{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--alto-tope));z-index:30;background:var(--nav-bg);
+  border-bottom:1px solid var(--linea)}
+.cats-in{max-width:1180px;margin:0 auto;padding:0 16px}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:9px 0}
 .chips::-webkit-scrollbar{display:none}
-.chip{white-space:nowrap;padding:12px 11px 9px;border-bottom:3px solid transparent;color:#3A3F4B;font-size:13.5px;font-weight:600;border-radius:0}
-.chip:hover{color:var(--nav-activo)}
-.chip[aria-pressed="true"]{color:var(--nav-activo);border-bottom-color:var(--nav-activo);font-weight:800}
+.chip{white-space:nowrap;padding:7px 14px;border-radius:var(--radio-chip);border:1px solid var(--linea);background:#FFFFFF;
+  color:#3A3F4B;font-size:13px;font-weight:600;box-shadow:0 1px 2px rgba(23,26,33,.05);transition:border-color .15s,color .15s}
+.chip:hover{border-color:var(--pri);color:var(--pri)}
+.chip[aria-pressed="true"]{background:var(--pri);border-color:var(--pri);color:var(--pri-texto);font-weight:700}
 
 main{max-width:1180px;margin:0 auto;padding:16px 16px 40px}
 
@@ -405,10 +412,13 @@ body.con-barra .pie-credito{padding-bottom:calc(92px + env(safe-area-inset-botto
 </head>
 <body>
 
-<div class="anuncio" id="anuncio" hidden>
+<div class="anuncio" id="anuncio">
   <div class="anuncio-in">
-    <span class="frase" id="frase"></span>
-    <span class="redes" id="redesAnuncio" hidden></span>
+    <span class="frase" id="frase" hidden></span>
+    <span class="anuncio-der">
+      <span class="redes" id="redesAnuncio" hidden></span>
+      <span class="tasa-txt">Tasa BCV: <b id="tasaTxt">—</b> Bs/$</span>
+    </span>
   </div>
 </div>
 
@@ -418,21 +428,28 @@ body.con-barra .pie-credito{padding-bottom:calc(92px + env(safe-area-inset-botto
       <img class="logo" id="logo" alt="" decoding="async">
       <span class="negocio" id="negocio"></span>
     </div>
-    <div class="slot-pc" id="slotPC"></div>
-    <div class="tope-acc">
-    <div class="tasa" title="Tasa oficial del Banco Central de Venezuela"><small>Tasa BCV</small><b id="tasaTxt">—</b></div>
-    <a class="tope-wa" id="topeWa" href="#" target="_blank" rel="noopener" hidden aria-label="Escríbenos por WhatsApp"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2zm0 18a8 8 0 01-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1112 20zm4.4-5.8c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 01-3.2-2.8c-.1-.2 0-.4.1-.5l.4-.5c.1-.2.1-.3 0-.5l-.7-1.6c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3a2.9 2.9 0 00-.9 2.1c0 1.3.9 2.5 1 2.6a10 10 0 003.9 3.4c1.8.7 1.8.5 2.2.5.3 0 1.2-.5 1.4-1 .2-.5.2-.9.1-1z"/></svg><span>Ayuda</span></a>
-    <button class="btn-carrito" onclick="abrirCarrito()" aria-label="Ver tu pedido">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.3h11L21 7H6"/></svg>
-      <span class="tot-carrito" id="totCarrito"></span>
-      <span class="pill" id="pillCant">0</span>
-    </button>
+    <div class="buscador" id="buscador">
+      <svg class="lupa" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="¿Qué buscas hoy?" oninput="filtrar()" autocomplete="off" enterkeyhint="search" aria-label="Buscar producto">
+      <button class="busca-btn" type="button" aria-label="Buscar" onclick="document.getElementById('q').blur(); filtrar()">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      </button>
     </div>
+    <button class="btn-carrito" onclick="abrirCarrito()" aria-label="Ver tu pedido">
+      <span class="carro-ico">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.3h11L21 7H6"/></svg>
+        <span class="pill" id="pillCant">0</span>
+      </span>
+      <span class="carro-txt"><small>Mi pedido</small><b id="totCarrito">$0,00</b></span>
+    </button>
   </div>
 </header>
 <script>
 // Logo y nombre salen del bloque TIENDA: no esperan a ControlMaster.
 (function () {
+  // En el teléfono el buscador es angosto: texto corto para que se lea completo.
+  var q = document.getElementById("q");
+  if (q && window.matchMedia && matchMedia("(max-width:899px)").matches) q.placeholder = "Buscar…";
   var T = window.TIENDA, img = document.getElementById("logo"), n = document.getElementById("negocio");
   if (T.logo) {
     img.onerror = function () { img.remove(); window._sinLogo = true; if (window.pintarNombre) window.pintarNombre(); };
@@ -444,27 +461,9 @@ body.con-barra .pie-credito{padding-bottom:calc(92px + env(safe-area-inset-botto
 })();
 </script>
 
-<nav class="cats" aria-label="Buscar y categorías">
-  <div class="slot-movil" id="slotMovil">
-    <div class="buscador" id="buscador">
-      <svg class="lupa" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-      <input id="q" type="search" placeholder="¿Qué buscas hoy?" oninput="filtrar()" autocomplete="off" enterkeyhint="search" aria-label="Buscar producto">
-      <button class="busca-btn" type="button" aria-label="Buscar" onclick="document.getElementById('q').blur(); filtrar()">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-      </button>
-    </div>
-  </div>
-  <div class="cats-lista"><div class="cats-in"><div class="chips" id="chips"></div></div></div>
+<nav class="cats" aria-label="Categorías">
+  <div class="cats-in"><div class="chips" id="chips"></div></div>
 </nav>
-<script>
-// El buscador va en el encabezado en la computadora y debajo del logo en el teléfono.
-(function () {
-  var mq = window.matchMedia("(min-width:900px)");
-  function mover(){ var b = document.getElementById("buscador"); (mq.matches ? document.getElementById("slotPC") : document.getElementById("slotMovil")).appendChild(b); }
-  mover();
-  if (mq.addEventListener) mq.addEventListener("change", mover); else if (mq.addListener) mq.addListener(mover);
-})();
-</script>
 
 <main>
   <section class="promos" id="promos" hidden aria-label="Promociones">
@@ -651,16 +650,15 @@ function redesHTML(r){
 }
 function pintarTienda(d){
   const tc = d.tienda || {}, frase = tc.frase || "";
-  $("frase").textContent = frase;
+  $("frase").textContent = frase; $("frase").hidden = !frase;
   const rh = redesHTML(tc.redes);
   $("redesAnuncio").innerHTML = rh; $("redesAnuncio").hidden = !rh;
-  $("anuncio").hidden = !frase;
   $("pieRedes").innerHTML = rh; $("pieRedes").hidden = !rh;
   $("pieFrase").textContent = frase;
   const wa = numeroWhatsApp();
   const ayuda = wa ? "https://wa.me/" + wa + "?text=" + encodeURIComponent("Hola, tengo una pregunta sobre la tienda.") : "";
-  $("topeWa").hidden = !wa; $("pieWa").hidden = !wa;
-  if (wa){ $("topeWa").href = ayuda; $("pieWa").href = ayuda; }
+  $("pieWa").hidden = !wa;
+  if (wa) $("pieWa").href = ayuda;
   const nom = tc.nombre || T.negocio || d.negocio || "";
   $("pieCredito").href = "https://wa.me/584121463316?text=" + encodeURIComponent("Hola, vi la tienda online de " + (nom || "un negocio") + " y quiero una para mi negocio.");
   const logo = $("logo");
@@ -961,8 +959,7 @@ function refrescarPedido(){
   const unidades = Object.values(carrito).reduce((a, b) => a + b, 0);
   const total = totalUSD();
   $("pillCant").textContent = num(unidades);
-  $("totCarrito").textContent = unidades ? "$" + usd(total) : "";
-  $("totCarrito").classList.toggle("on", unidades > 0);
+  $("totCarrito").textContent = "$" + usd(total);
   $("bpCant").textContent = num(unidades);
   $("bpTot").textContent = "$" + usd(total);
   document.body.classList.toggle("con-barra", unidades > 0);
