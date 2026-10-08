@@ -207,10 +207,9 @@ main{max-width:1120px;margin:0 auto;padding:18px 16px 40px}
 .card.sin .foto-caja img{filter:grayscale(1);opacity:.45}
 .card.sin .nom{color:var(--texto-2)}
 .card.sin .precio{color:var(--texto-2);font-weight:700}
-.foto-caja{position:relative;background:#FFFFFF;aspect-ratio:1/1;overflow:hidden;margin:8px 8px 0;
+.foto-caja{position:relative;background:#FFFFFF;aspect-ratio:1/1;overflow:hidden;margin:6px 6px 0;
   border:1px solid var(--linea);border-radius:max(4px, calc(var(--radio) - 6px))}
-@media(max-width:619px){.foto-caja{aspect-ratio:5/4}}
-.foto-caja img{width:100%;height:100%;object-fit:contain;display:block;padding:6px}
+.foto-caja img{width:100%;height:100%;object-fit:contain;display:block}
 .sinfoto{width:100%;height:100%;background:var(--foto);display:grid;place-items:center;color:var(--texto-2);font-size:11px;text-align:center;padding:10px}
 .etq{position:absolute;top:6px;left:6px;font-size:11px;font-weight:700;padding:4px 9px;border-radius:var(--radio-chip);
   background:var(--carta);color:var(--texto-2);border:1px solid var(--linea)}
@@ -219,8 +218,8 @@ main{max-width:1120px;margin:0 auto;padding:18px 16px 40px}
 .card-b{padding:10px 12px 12px;display:flex;flex-direction:column;gap:3px;flex:1}
 .nom{font-size:16px;font-weight:600;line-height:1.35;margin:0;min-height:43px;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.precio{font-weight:800;font-size:25px;line-height:1.15;letter-spacing:-.5px;margin-top:8px}
-.bs{font-size:16px;font-weight:700;color:var(--texto);opacity:.78;margin-top:1px}
+.precio{font-weight:800;font-size:21px;line-height:1.15;letter-spacing:-.4px;margin-top:6px}
+.bs{font-size:15px;font-weight:700;color:var(--texto);opacity:.78;margin-top:0}
 .card.sin .bs{font-weight:500}
 .accion{margin-top:10px;height:42px}
 .add{width:100%;height:100%;background:var(--acento);color:var(--acento-texto);font-weight:800;border-radius:var(--radio-btn);
@@ -957,13 +956,7 @@ function enviarPedido(){
   // 2) WhatsApp se abre en este mismo toque: si se espera al servidor, el navegador lo bloquea.
   const wa  = numeroWhatsApp();
   const url = wa ? "https://wa.me/" + wa + "?text=" + encodeURIComponent(textoWhatsApp(ref, d, lineas, total, tasa, totalBs)) : "";
-  let abierto = false;
-  if (url){
-    try {
-      const w = window.open(url, "_blank");
-      if (w){ abierto = true; try { w.opener = null; } catch(e) {} }
-    } catch(e) {}
-  }
+  const abierto = url ? abrirWhatsApp(url) : false;
 
   try { localStorage.setItem("cm_cliente", JSON.stringify(d)); } catch(e) {}
   carrito = {};
@@ -978,6 +971,7 @@ function mostrarFinal(ref, d, total, tasa, totalBs, url, abierto){
   $("mDatos").classList.remove("on");
   const m = $("mFinal");
   m.dataset.ref = ref;
+  ultimoEstado = null;
   $("finTitulo").textContent = "Pedido #" + ref;
   $("finTxt").textContent = !url ? "Tu pedido quedó guardado."
     : abierto ? "Abrimos WhatsApp con tu pedido ya escrito."
@@ -1006,6 +1000,7 @@ function mostrarFinal(ref, d, total, tasa, totalBs, url, abierto){
 function estadoFinal(ref, est){
   const m = $("mFinal");
   if (m.dataset.ref !== ref) return;
+  ultimoEstado = est;
   const e = $("finEstado");
   e.className = "fin-estado" + (est === "ok" ? " ok" : "");
   e.textContent =
@@ -1016,6 +1011,51 @@ function estadoFinal(ref, est){
 }
 
 function terminar(){ cerrarTodo(); }
+
+// ══════════ WHATSAPP Y BOTÓN ATRÁS ══════════
+// En el teléfono WhatsApp se abre en la MISMA pestaña: así no queda una pestaña de WhatsApp abierta
+// detrás de la tienda. En la computadora se abre WhatsApp Web en otra pestaña.
+const MOVIL = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ||
+              (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform || ""));
+function abrirWhatsApp(url){
+  if (MOVIL){ location.href = url; return true; }
+  try { const w = window.open(url, "_blank"); if (w){ try { w.opener = null; } catch(e) {} return true; } } catch(e) {}
+  return false;
+}
+if (MOVIL) ["btnWa", "promoWa"].forEach(id => { const a = $(id); if (a) a.removeAttribute("target"); });
+
+// Al volver de WhatsApp se cierra sola la pantalla final (si el aviso a la tienda no tuvo problema).
+let ultimoEstado = null, fueraEnWhatsApp = false;
+document.addEventListener("visibilitychange", () => {
+  const fin = $("mFinal");
+  if (document.visibilityState === "hidden"){ if (fin.classList.contains("on")) fueraEnWhatsApp = true; return; }
+  if (!fueraEnWhatsApp) return;
+  fueraEnWhatsApp = false;
+  setTimeout(() => {
+    if (!fin.classList.contains("on")) return;
+    if (ultimoEstado && ultimoEstado !== "ok") return;     // hay algo que el comprador debe leer: se queda abierta
+    const ref = fin.dataset.ref;
+    terminar();
+    toast("Pedido #" + ref + " listo. ¡Gracias!");
+  }, 350);
+});
+
+// El botón "atrás" del teléfono cierra la ventana abierta (carrito, datos, pedido) en vez de salir de la tienda.
+let capaEnHistoria = false, cierrePorAtras = false;
+new MutationObserver(() => {
+  const abierta = $("velo").classList.contains("on");
+  if (abierta && !capaEnHistoria){
+    try { history.pushState({ cmCapa: true }, ""); capaEnHistoria = true; } catch(e) {}
+  } else if (!abierta && capaEnHistoria){
+    capaEnHistoria = false;
+    if (cierrePorAtras) cierrePorAtras = false; else { try { history.back(); } catch(e) {} }
+  }
+}).observe($("velo"), { attributes: true, attributeFilter: ["class"] });
+window.addEventListener("popstate", () => {
+  if (!capaEnHistoria) return;
+  cierrePorAtras = true;
+  cerrarTodo();
+});
 
 // ══════════ REGISTRO EN SEGUNDO PLANO ══════════
 // Cada pedido queda guardado en este navegador hasta que ControlMaster confirma que lo recibió.
