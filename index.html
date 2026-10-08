@@ -4,9 +4,46 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Catálogo online</title>
+<script>
+// ══════════════════════════════════════════════════════════════
+//  CONFIGURACIÓN DE LA TIENDA — una copia de este archivo por cliente.
+//  Más adelante el Worker de MiTiendaMaster llenará este bloque solo.
+// ══════════════════════════════════════════════════════════════
+window.TIENDA = {
+  negocio:       "",     // ← nombre del negocio (sale arriba al instante)
+  mostrarNombre: true,   // ← false si el logo ya trae el nombre escrito
+  cliente:       "",     // ← identificador de fotos del cliente (Configuración H34)
+  sistema:       "",     // ← URL /exec de ControlMaster del cliente
+  whatsapp:      ""      // ← opcional: WhatsApp de la tienda (ej. 584141234567). Vacío = el de Configuración H33
+};
+// ══════════════════════════════════════════════════════════════
+(function () {
+  var T = window.TIENDA, q = new URLSearchParams(location.search);
+  // Demo para prospectos (con el bloque vacío): ?c=<identificador>&s=<ID o URL del /exec>&n=<nombre>
+  if (!T.cliente) T.cliente = (q.get("c") || "").toLowerCase().trim();
+  if (!T.sistema) {
+    var s = (q.get("s") || "").trim();
+    T.sistema = !s ? "" : (s.indexOf("http") === 0 ? s : "https://script.google.com/macros/s/" + s + "/exec");
+  }
+  if (!T.negocio) T.negocio = (q.get("n") || "").trim();
+  T.fotos          = "https://fotos.micontrolmaster.com";
+  T.logo           = T.cliente ? T.fotos + "/" + T.cliente + "/logo.webp" : "";
+  T.catalogoRapido = T.cliente ? T.fotos + "/" + T.cliente + "/catalogo.json" : "";
+  T.clave          = T.cliente || T.sistema;   // separa lo que guarda el navegador por tienda
+  if (T.logo) {
+    var l = document.createElement("link");
+    l.rel = "preload"; l.as = "image"; l.href = T.logo;
+    document.head.appendChild(l);
+  }
+  if (T.negocio) document.title = T.negocio + " · Catálogo";
+})();
+</script>
+<link rel="preconnect" href="https://fotos.micontrolmaster.com">
+<link rel="preconnect" href="https://script.google.com">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"></noscript>
 <style>
 :root{
   box-sizing:border-box;
@@ -17,6 +54,7 @@
   --texto:#12172B; --texto-2:#6B7490; --linea:#E9ECF3;
   --verde:#1F9D55; --wa:#25D366; --rojo:#E23D28;
   --r:16px;
+  --alto-tope:59px;
 }
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
@@ -28,7 +66,9 @@ input,select{font-family:inherit;font-size:16px}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
 .tope{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:var(--carta);border-bottom:1px solid var(--linea)}
-.tope-in{max-width:1120px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px}
+.tope-in{max-width:1120px;margin:0 auto;padding:0 16px;height:58px;display:flex;align-items:center;gap:12px}
+.marca{display:flex;align-items:center;gap:10px;min-width:0}
+.logo{height:40px;width:auto;max-width:140px;object-fit:contain;display:block;flex:0 0 auto}
 .negocio{font-weight:800;font-size:17px;letter-spacing:-.3px;color:var(--azul);min-width:0;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .btn-carrito{margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--azul);
@@ -40,7 +80,7 @@ input,select{font-family:inherit;font-size:16px}
 .tasa-in{max-width:1120px;margin:0 auto;padding:8px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .tasa b{font-weight:700}
 
-.controles{position:sticky;top:calc(env(safe-area-inset-top,0px) + 54px);z-index:30;background:var(--carta);border-bottom:1px solid var(--linea)}
+.controles{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--alto-tope));z-index:30;background:var(--carta);border-bottom:1px solid var(--linea)}
 .controles-in{max-width:1120px;margin:0 auto;padding:12px 16px 10px}
 .buscador{position:relative}
 .buscador input{width:100%;padding:12px 14px 12px 40px;border-radius:12px;border:1px solid var(--linea);
@@ -54,7 +94,7 @@ input,select{font-family:inherit;font-size:16px}
 .chip[aria-pressed="true"]{background:var(--texto);border-color:var(--texto);color:var(--carta);font-weight:600}
 
 main{max-width:1120px;margin:0 auto;padding:16px 16px 40px}
-.conteo{color:var(--texto-2);font-size:12.5px;margin:0 0 12px}
+.conteo{color:var(--texto-2);font-size:12.5px;margin:0 0 12px;min-height:19px}
 .rejilla{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 @media(min-width:620px){.rejilla{grid-template-columns:repeat(3,1fr);gap:16px}}
 @media(min-width:920px){.rejilla{grid-template-columns:repeat(4,1fr)}}
@@ -81,6 +121,11 @@ main{max-width:1120px;margin:0 auto;padding:16px 16px 40px}
 .add{margin-top:12px;background:var(--amarillo);color:#33280A;font-weight:700;padding:11px;border-radius:12px;
   display:flex;align-items:center;justify-content:center;gap:7px;font-size:13px;letter-spacing:.2px}
 .add:disabled{background:var(--foto);color:var(--texto-2);cursor:not-allowed}
+
+/* Tarjetas "esqueleto" mientras llega el catálogo la primera vez */
+.card.esq .foto-caja,.esq-l{background:linear-gradient(90deg,#ECEEF3 25%,#F6F7FA 50%,#ECEEF3 75%);background-size:200% 100%;animation:brillo 1.2s ease-in-out infinite}
+.esq-l{height:12px;border-radius:6px;margin:5px 0}
+@keyframes brillo{from{background-position:200% 0}to{background-position:-200% 0}}
 
 .aviso-pag{text-align:center;padding:60px 20px;color:var(--texto-2);font-size:13.5px}
 .aviso-pag b{display:block;color:var(--texto);font-size:16px;font-weight:700;margin-bottom:6px}
@@ -120,7 +165,7 @@ footer{border-top:1px solid var(--linea);background:var(--carta);color:var(--tex
 .totales.grande{font-size:18px;color:var(--texto);font-weight:800;margin-bottom:6px}
 .nota{font-size:11.5px;color:var(--texto-2);margin:8px 0 12px;line-height:1.4}
 .btn-wa{width:100%;background:var(--wa);color:#04321A;font-weight:700;padding:14px;border-radius:13px;
-  display:flex;align-items:center;justify-content:center;gap:8px;font-size:14.5px}
+  display:flex;align-items:center;justify-content:center;gap:8px;font-size:14.5px;text-decoration:none}
 .btn-wa:disabled{opacity:.6;cursor:not-allowed}
 .btn-sec{width:100%;padding:12px;border-radius:13px;border:1px solid var(--linea);color:var(--texto-2);font-weight:600;margin-top:8px}
 
@@ -128,6 +173,7 @@ footer{border-top:1px solid var(--linea);background:var(--carta);color:var(--tex
   width:min(440px,calc(100vw - 32px));max-height:86vh;overflow-y:auto;background:var(--carta);
   border-radius:20px;box-shadow:0 20px 60px rgba(18,23,43,.28);display:none}
 .modal.on{display:block}
+#mAviso{z-index:75}
 .m-cuerpo{padding:20px}
 .m-cuerpo h3{font-size:17.5px;font-weight:800;margin:0 0 6px;letter-spacing:-.3px}
 .m-cuerpo p{margin:0 0 14px;color:var(--texto-2);font-size:13px;line-height:1.45}
@@ -152,8 +198,10 @@ footer{border-top:1px solid var(--linea);background:var(--carta);color:var(--tex
 .resumen .r-l{display:flex;justify-content:space-between;gap:10px;padding:3px 0;color:var(--texto-2)}
 .resumen .r-l span:last-child{color:var(--texto);font-weight:500;text-align:right}
 .resumen .r-l.tot{border-top:1px solid var(--linea);margin-top:7px;padding-top:8px;font-weight:700;color:var(--texto)}
+.fin-estado{font-size:12px;color:var(--texto-2);margin:12px 0 0;text-align:center;line-height:1.45;display:flex;gap:7px;align-items:center;justify-content:center}
+.fin-estado.ok{color:var(--verde);font-weight:600}
 
-.sp{width:15px;height:15px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;display:inline-block;animation:giro .7s linear infinite}
+.sp{width:15px;height:15px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;display:inline-block;animation:giro .7s linear infinite;flex:0 0 auto}
 .sp.oscuro{border-color:rgba(0,0,0,.2);border-top-color:#04321A}
 .sp.azul{border-color:rgba(27,69,224,.25);border-top-color:var(--azul)}
 @keyframes giro{to{transform:rotate(360deg)}}
@@ -168,13 +216,28 @@ footer{border-top:1px solid var(--linea);background:var(--carta);color:var(--tex
 
 <header class="tope">
   <div class="tope-in">
-    <span class="negocio" id="negocio">Cargando…</span>
+    <div class="marca">
+      <img class="logo" id="logo" alt="" decoding="async">
+      <span class="negocio" id="negocio"></span>
+    </div>
     <button class="btn-carrito" onclick="abrirCarrito()" aria-label="Ver carrito">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.3h11L21 7H6"/></svg>
       <span class="pill" id="pillCant">0</span>
     </button>
   </div>
 </header>
+<script>
+// Logo y nombre salen del bloque TIENDA: no esperan a ControlMaster.
+(function () {
+  var T = window.TIENDA, img = document.getElementById("logo"), n = document.getElementById("negocio");
+  if (T.logo) {
+    img.onerror = function () { img.remove(); window._sinLogo = true; if (window.pintarNombre) window.pintarNombre(); };
+    img.alt = T.negocio || "Logo";
+    img.src = T.logo;
+  } else { img.remove(); window._sinLogo = true; }
+  if (T.mostrarNombre !== false || !T.logo) n.textContent = T.negocio || "";
+})();
+</script>
 
 <div class="tasa"><div class="tasa-in"><span>Tasa BCV: <b id="tasaTxt">—</b> Bs/$</span></div></div>
 
@@ -192,7 +255,7 @@ footer{border-top:1px solid var(--linea);background:var(--carta);color:var(--tex
   <p class="conteo" id="conteo"></p>
   <div class="rejilla" id="rejilla"></div>
   <div class="cargando" id="masAbajo" style="display:none">Cargando más productos…</div>
-  <div class="aviso-pag" id="estado"><b>Cargando catálogo…</b>Un momento por favor.</div>
+  <div class="aviso-pag" id="estado" style="display:none"></div>
 </main>
 
 <footer>
@@ -214,8 +277,8 @@ footer{border-top:1px solid var(--linea);background:var(--carta);color:var(--tex
   <div class="m-cuerpo">
     <h3>Solo faltan tus datos</h3>
     <div class="fila">
-      <div class="campo"><label for="f_nom">Nombre</label><input id="f_nom" placeholder="Ej: María"></div>
-      <div class="campo"><label for="f_ape">Apellido</label><input id="f_ape" placeholder="Ej: Pérez"></div>
+      <div class="campo"><label for="f_nom">Nombre</label><input id="f_nom" placeholder="Ej: María" autocomplete="given-name"></div>
+      <div class="campo"><label for="f_ape">Apellido</label><input id="f_ape" placeholder="Ej: Pérez" autocomplete="family-name"></div>
     </div>
     <div class="campo">
       <label for="f_ci">Cédula</label>
@@ -224,7 +287,7 @@ footer{border-top:1px solid var(--linea);background:var(--carta);color:var(--tex
         <input id="f_ci" inputmode="numeric" placeholder="12345678">
       </div>
     </div>
-    <div class="campo"><label for="f_tel">Teléfono (WhatsApp)</label><input id="f_tel" inputmode="tel" placeholder="0414 1234567"></div>
+    <div class="campo"><label for="f_tel">Teléfono (WhatsApp)</label><input id="f_tel" inputmode="tel" placeholder="0414 1234567" autocomplete="tel"></div>
     <div class="campo"><label for="f_dir">Ciudad o zona de entrega</label><input id="f_dir" placeholder="Ej: Maracay, Base Aragua"></div>
     <div class="err" id="errDatos"></div>
     <button class="btn-wa" id="btnEnviar" onclick="enviarPedido()">
@@ -235,21 +298,19 @@ footer{border-top:1px solid var(--linea);background:var(--carta);color:var(--tex
   </div>
 </div>
 
-<div class="modal" id="mFinal" role="dialog" aria-label="Pedido registrado">
+<div class="modal" id="mFinal" role="dialog" aria-label="Pedido enviado">
   <div class="m-cuerpo">
     <div class="aviso-ico">✅</div>
-    <h3 id="finTitulo">Pedido registrado</h3>
-    <p>Guardamos tu pedido y le llegó a la tienda.</p>
-    <div class="paso">
-      <b>⚠️ Falta un paso, no cierres todavía</b>
-      <span>Tu pedido no está confirmado hasta que lo envíes por WhatsApp. Ahí acuerdas el envío y la forma de pago. Si cierras ahora, la tienda no sabrá cómo ubicarte.</span>
-    </div>
+    <h3 id="finTitulo">Pedido</h3>
+    <p id="finTxt"></p>
+    <div class="paso" id="finPaso"></div>
     <div class="resumen" id="resDatos"></div>
     <a class="btn-wa" id="btnWa" href="#" target="_blank" rel="noopener">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2zm0 18a8 8 0 01-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1112 20zm4.4-5.8c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 01-3.2-2.8c-.1-.2 0-.4.1-.5l.4-.5c.1-.2.1-.3 0-.5l-.7-1.6c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3a2.9 2.9 0 00-.9 2.1c0 1.3.9 2.5 1 2.6a10 10 0 003.9 3.4c1.8.7 1.8.5 2.2.5.3 0 1.2-.5 1.4-1 .2-.5.2-.9.1-1z"/></svg>
-      Abrir WhatsApp
+      <span id="btnWaTxt">Abrir WhatsApp</span>
     </a>
-    <button class="btn-sec" onclick="terminar()">Ya lo envié por WhatsApp</button>
+    <p class="fin-estado" id="finEstado"></p>
+    <button class="btn-sec" id="finListo" onclick="terminar()">Ya lo envié por WhatsApp</button>
   </div>
 </div>
 
@@ -265,105 +326,158 @@ footer{border-top:1px solid var(--linea);background:var(--carta);color:var(--tex
 <div id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════════════════════════
-//  CONFIGURACIÓN
-//  Para el catálogo de un cliente: pega su URL del Web App aquí
-//  y borra la parte del parámetro, para que no dependa del enlace.
-// ══════════════════════════════════════════════════════════════
-const SISTEMA_FIJO = "";   // ← URL /exec del cliente. Vacío = se toma de ?s=
-
-function urlSistema(){
-  if (SISTEMA_FIJO) return SISTEMA_FIJO;
-  const p = new URLSearchParams(location.search).get("s") || "";
-  if (!p) return "";
-  if (p.indexOf("http") === 0) return p;
-  return "https://script.google.com/macros/s/" + p + "/exec";
-}
-
+const T = window.TIENDA;
 const SIN_CATEGORIA = "Otros";
-let CAT = null, filtrados = [], categoria = "", pintados = 0, carrito = {};
-const LOTE = 12;
+const LOTE   = 12;
+const K_CAT  = "cm_cat_"  + T.clave;   // último catálogo visto (pinta al instante en la próxima visita)
+const K_PEND = "cm_pend_" + T.clave;   // pedidos que aún no llegaron a ControlMaster
 
-function usd(v){return Number(v).toLocaleString("es-VE",{minimumFractionDigits:2,maximumFractionDigits:2});}
-function bs(v){return (Number(v)*(CAT?CAT.tasa:0)).toLocaleString("es-VE",{minimumFractionDigits:2,maximumFractionDigits:2});}
-function num(v){return Number(v).toLocaleString("es-VE");}
-function prod(c){return CAT.productos.find(p=>p.c===c);}
-function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
+let CAT = null, INDICE = {}, filtrados = [], categoria = "", pintados = 0, carrito = {};
+const enVuelo = {};
+
+function $(id){ return document.getElementById(id); }
+function r2(v){ return Math.round((Number(v) || 0) * 100) / 100; }
+function usd(v){ return Number(v).toLocaleString("es-VE",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function bs(v){ return usd(Number(v) * (CAT ? Number(CAT.tasa) || 0 : 0)); }
+function num(v){ return Number(v).toLocaleString("es-VE"); }
+function prod(c){ return INDICE[String(c)]; }
+function subtotal(p, q){ return r2(p.p * q); }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+
+// Nombre arriba y en el pie. Si el logo trae el nombre (mostrarNombre:false) solo se escribe cuando no hay logo.
+function pintarNombre(){
+  const nom = T.negocio || (CAT && CAT.negocio) || "";
+  $("negocio").textContent = (T.mostrarNombre !== false || window._sinLogo) ? nom : "";
+  $("pieNegocio").textContent = nom;
+  if (nom) document.title = nom + " · Catálogo";
+}
 
 // ══════════ CARGA DEL CATÁLOGO ══════════
+// 1) Lo último que vio este navegador se pinta al instante.
+// 2) Se pide el catálogo nuevo: primero la copia rápida (R2) y, si no existe, el /exec.
+// 3) Si cambió, se repinta sin perder la búsqueda, la categoría ni el carrito.
 async function cargar(){
-  const base = urlSistema();
-  if (!base){
-    document.getElementById("estado").innerHTML =
-      "<b>Falta indicar el sistema</b>Agrega <code>?s=</code> con la dirección del Web App al final del enlace.";
+  if (!T.catalogoRapido && !T.sistema){
+    mostrarEstado("<b>Falta indicar la tienda</b>Llena el bloque TIENDA al inicio del archivo, o agrega <code>?c=</code> y <code>?s=</code> al enlace.");
     return;
   }
-  try{
-    const r = await fetch(base + "?api=catalogo");
-    const d = await r.json();
-    if (d.error) throw new Error(d.error);
-    CAT = d;
-    CAT.productos.forEach(p => { if(!p.g) p.g = SIN_CATEGORIA; });
+  let guardado = null;
+  try { guardado = JSON.parse(localStorage.getItem(K_CAT) || "null"); } catch(e) {}
+  if (guardado && Array.isArray(guardado.productos)) aplicarCatalogo(guardado);
+  else mostrarEsqueleto();
 
-    document.getElementById("negocio").textContent   = d.negocio || "Catálogo";
-    document.getElementById("pieNegocio").textContent = d.negocio || "";
-    document.title = (d.negocio ? d.negocio + " · " : "") + "Catálogo";
-    document.getElementById("tasaTxt").textContent   = usd(d.tasa);
-
-    const cats = (d.categorias||[]).filter(c=>c);
-    if (CAT.productos.some(p=>p.g===SIN_CATEGORIA)) cats.push(SIN_CATEGORIA);
-    document.getElementById("chips").innerHTML =
-      '<button class="chip" aria-pressed="true" onclick="setCat(\'\',this)">Todo</button>' +
-      cats.map(c=>`<button class="chip" aria-pressed="false" onclick="setCat('${esc(c).replace(/'/g,"\\'")}',this)">${esc(c)}</button>`).join("");
-
-    document.getElementById("estado").style.display = "none";
-    filtrar();
-  }catch(e){
-    document.getElementById("estado").innerHTML =
-      "<b>No se pudo cargar el catálogo</b>Revisa tu conexión e intenta de nuevo. Si el problema sigue, avísale a la tienda.";
+  try {
+    const fresco = await traerCatalogo();
+    if (!CAT || fresco.sello !== CAT.sello) aplicarCatalogo(fresco);
+    try { localStorage.setItem(K_CAT, JSON.stringify(fresco)); } catch(e) {}
+  } catch(e) {
+    if (!CAT){
+      $("rejilla").innerHTML = "";
+      mostrarEstado("<b>No se pudo cargar el catálogo</b>Revisa tu conexión e intenta de nuevo. Si el problema sigue, avísale a la tienda.");
+    }
   }
+  reintentarPendientes();
 }
 
-function setCat(c,btn){
-  categoria = c;
-  document.querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-pressed","false"));
-  btn.setAttribute("aria-pressed","true");
-  filtrar();
-  window.scrollTo({top:0,behavior:"smooth"});
+async function traerCatalogo(){
+  if (T.catalogoRapido){
+    try {
+      const r = await fetch(T.catalogoRapido, { cache: "no-cache" });
+      if (r.ok){
+        const d = await r.json();
+        if (d && Array.isArray(d.productos)) return d;
+      }
+    } catch(e) {}
+  }
+  if (!T.sistema) throw new Error("Sin catálogo rápido ni sistema");
+  const r = await fetch(T.sistema + "?api=catalogo");
+  const d = await r.json();
+  if (d.error) throw new Error(d.error);
+  return d;
 }
+
+function aplicarCatalogo(d){
+  const primera = !CAT;
+  d.productos.forEach(p => { p.c = String(p.c); if (!p.g) p.g = SIN_CATEGORIA; });
+  CAT = d;
+  INDICE = {};
+  CAT.productos.forEach(p => { INDICE[p.c] = p; });
+
+  pintarNombre();
+  $("tasaTxt").textContent = usd(d.tasa || 0);
+
+  const cats = (d.categorias || []).filter(c => c);
+  if (CAT.productos.some(p => p.g === SIN_CATEGORIA) && cats.indexOf(SIN_CATEGORIA) < 0) cats.push(SIN_CATEGORIA);
+  if (categoria && cats.indexOf(categoria) < 0) categoria = "";
+  $("chips").innerHTML =
+    '<button class="chip" data-cat="" aria-pressed="' + (categoria ? "false" : "true") + '">Todo</button>' +
+    cats.map(c => '<button class="chip" data-cat="' + esc(c) + '" aria-pressed="' + (c === categoria) + '">' + esc(c) + '</button>').join("");
+
+  $("estado").style.display = "none";
+  if (primera) filtrar();
+  else { ajustarCarrito(); repintar(); }
+}
+
+function mostrarEstado(html){ const e = $("estado"); e.innerHTML = html; e.style.display = "block"; }
+
+function mostrarEsqueleto(){
+  $("estado").style.display = "none";
+  let h = "";
+  for (let i = 0; i < 8; i++)
+    h += '<div class="card esq" aria-hidden="true"><div class="foto-caja"></div><div class="card-b">' +
+         '<div class="esq-l" style="width:40%"></div><div class="esq-l"></div><div class="esq-l" style="width:70%"></div>' +
+         '<div class="esq-l" style="width:50%;height:20px;margin-top:8px"></div></div></div>';
+  $("rejilla").innerHTML = h;
+}
+
+$("chips").addEventListener("click", e => {
+  const b = e.target.closest(".chip");
+  if (!b) return;
+  categoria = b.dataset.cat || "";
+  document.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+  filtrar();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
 
 function filtrar(){
-  if(!CAT) return;
-  const q = document.getElementById("q").value.trim().toLowerCase();
-  filtrados = CAT.productos.filter(p=>{
-    if(categoria && p.g!==categoria) return false;
-    if(!q) return true;
-    return p.n.toLowerCase().includes(q) || p.c.toLowerCase().includes(q);
+  if (!CAT) return;
+  const q = $("q").value.trim().toLowerCase();
+  filtrados = CAT.productos.filter(p => {
+    if (categoria && p.g !== categoria) return false;
+    if (!q) return true;
+    return String(p.n).toLowerCase().includes(q) || p.c.toLowerCase().includes(q);
   });
   pintados = 0;
-  document.getElementById("rejilla").innerHTML = "";
-  const est = document.getElementById("estado");
-  if(!filtrados.length){
-    est.style.display = "block";
-    est.innerHTML = "<b>Sin resultados</b>Prueba con otro nombre o revisa las categorías.";
-  } else est.style.display = "none";
-  document.getElementById("conteo").textContent =
-    filtrados.length ? filtrados.length + (filtrados.length>1?" productos":" producto") + (categoria?" en "+categoria:"") : "";
+  $("rejilla").innerHTML = "";
+  if (!filtrados.length) mostrarEstado("<b>Sin resultados</b>Prueba con otro nombre o revisa las categorías.");
+  else $("estado").style.display = "none";
+  $("conteo").textContent = filtrados.length
+    ? filtrados.length + (filtrados.length > 1 ? " productos" : " producto") + (categoria ? " en " + categoria : "")
+    : "";
   pintarLote();
 }
 
-function imagen(p, clase){
-  if(p.i) return `<img src="${esc(p.i)}" alt="${esc(p.n)}" loading="lazy" onerror="this.parentNode.innerHTML='<div class=\\'sinfoto\\'>Sin foto</div>'">`;
-  return `<div class="sinfoto">Sin foto</div>`;
+// Vuelve a pintar lo mismo que ya se veía (no salta al inicio de la lista)
+function repintar(){
+  const antes = pintados;
+  filtrar();
+  while (pintados < antes && pintados < filtrados.length) pintarLote();
 }
 
+function imagen(p){
+  if (p.i) return '<img src="' + esc(p.i) + '" alt="' + esc(p.n) + '" loading="lazy" decoding="async" onerror="sinFoto(this)">';
+  return '<div class="sinfoto">Sin foto</div>';
+}
+function sinFoto(img){ const d = document.createElement("div"); d.className = "sinfoto"; d.textContent = "Sin foto"; img.replaceWith(d); }
+
 function pintarLote(){
-  const cont = document.getElementById("rejilla");
-  filtrados.slice(pintados, pintados+LOTE).forEach(p=>{
+  const cont = $("rejilla");
+  filtrados.slice(pintados, pintados + LOTE).forEach(p => {
     const d = document.createElement("article");
-    d.className = "card" + (p.e===0 ? " sin" : "");
-    const etq = p.e===0 ? '<span class="etq no">Agotado</span>'
-              : p.e===1 ? '<span class="etq poco">Últimas unidades</span>' : "";
+    d.className = "card" + (p.e === 0 ? " sin" : "");
+    const etq = p.e === 0 ? '<span class="etq no">Agotado</span>'
+              : p.e === 1 ? '<span class="etq poco">Últimas unidades</span>' : "";
+    const txt = p.e === 0 ? "NO DISPONIBLE" : (carrito[p.c] ? "AGREGAR OTRO" : "AGREGAR");
     d.innerHTML = `
       <div class="foto-caja">${imagen(p)}${etq}</div>
       <div class="card-b">
@@ -371,68 +485,71 @@ function pintarLote(){
         <p class="nom">${esc(p.n)}</p>
         <span class="precio">$${usd(p.p)}</span>
         <span class="bs">Bs ${bs(p.p)}</span>
-        <button class="add" ${p.e===0?"disabled":""} onclick="agregar('${esc(p.c)}',this)">
-          ${p.e===0 ? "NO DISPONIBLE" : "AGREGAR"}
-        </button>
+        <button class="add" data-c="${esc(p.c)}" ${p.e === 0 ? "disabled" : ""}>${txt}</button>
       </div>`;
     cont.appendChild(d);
   });
   pintados += Math.min(LOTE, filtrados.length - pintados);
-  document.getElementById("masAbajo").style.display = pintados < filtrados.length ? "block" : "none";
+  $("masAbajo").style.display = pintados < filtrados.length ? "block" : "none";
 }
 
-window.addEventListener("scroll", ()=>{
-  if(!CAT || pintados >= filtrados.length) return;
-  if(window.innerHeight + window.scrollY > document.body.offsetHeight - 500) pintarLote();
+$("rejilla").addEventListener("click", e => {
+  const b = e.target.closest("button.add");
+  if (b && !b.disabled) agregar(b.dataset.c, b);
+});
+
+window.addEventListener("scroll", () => {
+  if (!CAT || pintados >= filtrados.length) return;
+  if (window.innerHeight + window.scrollY > document.body.offsetHeight - 500) pintarLote();
 });
 
 // ══════════ CARRITO ══════════
 function agregar(cod, btn){
-  const p = prod(cod), actual = carrito[cod] || 0;
-  if(actual + 1 > p.m){
-    aviso("No hay más unidades", "De <b>"+esc(p.n)+"</b> no queda más existencia de la que ya tienes en tu pedido.", "⚠️");
+  const p = prod(cod);
+  if (!p) return;
+  const actual = carrito[p.c] || 0;
+  if (actual + 1 > p.m){
+    aviso("No hay más unidades", "De <b>" + esc(p.n) + "</b> no queda más existencia de la que ya tienes en tu pedido.", "⚠️");
     return;
   }
-  carrito[cod] = actual + 1;
+  carrito[p.c] = actual + 1;
   refrescarPill();
-  toast("Agregado: " + p.n.slice(0,28) + (p.n.length>28?"…":""));
-  btn.textContent = "AGREGAR OTRO";
+  toast("Agregado: " + p.n.slice(0, 28) + (p.n.length > 28 ? "…" : ""));
+  if (btn) btn.textContent = "AGREGAR OTRO";
 }
 
-function refrescarPill(){
-  document.getElementById("pillCant").textContent = num(Object.values(carrito).reduce((a,b)=>a+b,0));
-}
-function totalUSD(){ return Object.entries(carrito).reduce((s,[c,q])=>s + prod(c).p*q, 0); }
+function refrescarPill(){ $("pillCant").textContent = num(Object.values(carrito).reduce((a, b) => a + b, 0)); }
+function totalUSD(){ return r2(Object.entries(carrito).reduce((s, [c, q]) => { const p = prod(c); return s + (p ? subtotal(p, q) : 0); }, 0)); }
 
 function abrirCarrito(){
   pintarCarrito();
-  document.getElementById("velo").classList.add("on");
-  document.getElementById("gaveta").classList.add("on");
+  $("velo").classList.add("on");
+  $("gaveta").classList.add("on");
 }
 
 function pintarCarrito(){
-  const cont = document.getElementById("lineas"), pie = document.getElementById("piePedido");
-  const items = Object.entries(carrito);
-  if(!items.length){
+  const cont = $("lineas"), pie = $("piePedido");
+  const items = Object.entries(carrito).filter(([c]) => prod(c));
+  if (!items.length){
     cont.innerHTML = '<div class="aviso-pag"><b>Tu pedido está vacío</b>Agrega productos del catálogo y aquí los revisas antes de enviarlos.</div>';
     pie.innerHTML = '<button class="btn-sec" onclick="cerrarTodo()">Seguir viendo productos</button>';
     return;
   }
-  cont.innerHTML = items.map(([cod,q])=>{
-    const p = prod(cod);
+  cont.innerHTML = items.map(([cod, q]) => {
+    const p = prod(cod), c = esc(cod);
     return `<div class="linea">
       <div class="mini">${imagen(p)}</div>
       <div class="info">
         <p>${esc(p.n)}</p>
         <small>$${usd(p.p)} c/u · Bs ${bs(p.p)}</small>
         <div class="cant">
-          <button onclick="cambiar('${esc(cod)}',-1)" aria-label="Quitar uno">−</button>
-          <input type="number" value="${q}" min="1" max="${p.m}" onchange="fijar('${esc(cod)}',this)" aria-label="Cantidad">
-          <button onclick="cambiar('${esc(cod)}',1)" ${q>=p.m?"disabled":""} aria-label="Agregar uno">+</button>
+          <button data-acc="menos" data-c="${c}" aria-label="Quitar uno">−</button>
+          <input type="number" inputmode="numeric" value="${q}" min="1" max="${p.m}" data-c="${c}" aria-label="Cantidad">
+          <button data-acc="mas" data-c="${c}" ${q >= p.m ? "disabled" : ""} aria-label="Agregar uno">+</button>
         </div>
-        <button class="quitar" onclick="cambiar('${esc(cod)}',-999)">Quitar del pedido</button>
+        <button class="quitar" data-acc="quitar" data-c="${c}">Quitar del pedido</button>
       </div>
-      <div style="text-align:right;font-weight:700;font-size:13px">$${usd(p.p*q)}</div>
+      <div style="text-align:right;font-weight:700;font-size:13px">$${usd(subtotal(p, q))}</div>
     </div>`;
   }).join("");
 
@@ -448,166 +565,293 @@ function pintarCarrito(){
     <button class="btn-sec" onclick="cerrarTodo()">Seguir comprando</button>`;
 }
 
+$("lineas").addEventListener("click", e => {
+  const b = e.target.closest("button[data-acc]");
+  if (!b || b.disabled) return;
+  const c = b.dataset.c, a = b.dataset.acc;
+  cambiar(c, a === "menos" ? -1 : a === "mas" ? 1 : -999);
+});
+$("lineas").addEventListener("change", e => {
+  const i = e.target.closest("input[data-c]");
+  if (i) fijar(i.dataset.c, i);
+});
+
 function cambiar(cod, d){
   const p = prod(cod);
-  if(d === -999){ delete carrito[cod]; }
-  else{
-    const nuevo = (carrito[cod]||0) + d;
-    if(nuevo > p.m){ aviso("Sin más existencia","De <b>"+esc(p.n)+"</b> no hay más unidades disponibles.","⚠️"); return; }
-    if(nuevo <= 0) delete carrito[cod]; else carrito[cod] = nuevo;
+  if (d === -999 || !p){ delete carrito[cod]; }
+  else {
+    const nuevo = (carrito[cod] || 0) + d;
+    if (nuevo > p.m){ aviso("Sin más existencia", "De <b>" + esc(p.n) + "</b> no hay más unidades disponibles.", "⚠️"); return; }
+    if (nuevo <= 0) delete carrito[cod]; else carrito[cod] = nuevo;
   }
   refrescarPill(); pintarCarrito();
 }
 
 function fijar(cod, input){
   const p = prod(cod), v = Math.floor(Number(input.value));
-  if(!v || v <= 0){ delete carrito[cod]; refrescarPill(); pintarCarrito(); return; }
-  if(v > p.m){
+  if (!p || !v || v <= 0){ delete carrito[cod]; refrescarPill(); pintarCarrito(); return; }
+  if (v > p.m){
     aviso("Cantidad mayor a la existencia",
-      "Pediste "+num(v)+" unidades de <b>"+esc(p.n)+"</b> y no hay tantas disponibles. Dejamos la cantidad en el máximo que podemos despachar.","⚠️");
+      "Pediste " + num(v) + " unidades de <b>" + esc(p.n) + "</b> y no hay tantas disponibles. Dejamos la cantidad en el máximo que podemos despachar.", "⚠️");
     carrito[cod] = p.m;
   } else carrito[cod] = v;
   refrescarPill(); pintarCarrito();
 }
 
-// ══════════ PEDIDO ══════════
-function pedirDatos(){
-  document.getElementById("gaveta").classList.remove("on");
-  document.getElementById("mDatos").classList.add("on");
-  document.getElementById("velo").classList.add("on");
-  try{
-    const g = JSON.parse(localStorage.getItem("cm_cliente") || "null");
-    if(g){ f_nom.value=g.nom||""; f_ape.value=g.ape||""; f_tipo.value=g.tipo||"V";
-           f_ci.value=g.ci||""; f_tel.value=g.tel||""; f_dir.value=g.dir||""; }
-  }catch(e){}
-}
-
-async function enviarPedido(){
-  const err = document.getElementById("errDatos");
-  const d = { nom:f_nom.value.trim(), ape:f_ape.value.trim(), tipo:f_tipo.value,
-              ci:f_ci.value.replace(/\D/g,""), tel:f_tel.value.trim(), dir:f_dir.value.trim() };
-  let falla = "";
-  if(!d.nom || !d.ape) falla = "Escribe tu nombre y tu apellido para identificar el pedido.";
-  else if(d.ci.length < 6) falla = "La cédula debe tener al menos 6 dígitos, sin puntos ni guiones.";
-  else if(d.tel.replace(/\D/g,"").length < 10) falla = "El teléfono debe tener 11 dígitos, empezando por el código de la operadora.";
-  else if(!d.dir) falla = "Indica tu ciudad o zona para poder calcular el envío.";
-  if(falla){ err.textContent = falla; err.classList.add("on"); return; }
-  err.classList.remove("on");
-
-  const btn = document.getElementById("btnEnviar"), original = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = '<span class="sp oscuro"></span> Registrando tu pedido…';
-
-  try{
-    const cuerpo = {
-      nombre:d.nom, apellido:d.ape, tipoDoc:d.tipo, cedula:d.ci,
-      telefono:d.tel, entrega:d.dir,
-      items: Object.entries(carrito).map(([c,q])=>({c:c,q:q}))
-    };
-    const r = await fetch(urlSistema(), {
-      method:"POST",
-      headers:{ "Content-Type":"text/plain;charset=utf-8" },
-      body: JSON.stringify(cuerpo)
-    });
-    const res = await r.json();
-
-    if(res.ok){
-      try{ localStorage.setItem("cm_cliente", JSON.stringify(d)); }catch(e){}
-      mostrarFinal(res, d);
-    } else if(res.motivo === "stock"){
-      manejarStock(res.problemas || []);
-    } else {
-      aviso("No pudimos registrar tu pedido",
-        "Ocurrió un problema al guardarlo. Intenta de nuevo en un momento; si sigue igual, escríbele a la tienda por WhatsApp.", "⚠️");
-    }
-  }catch(e){
-    aviso("No pudimos enviar tu pedido",
-      "Parece que se perdió la conexión. Revisa tu internet e intenta otra vez; tu pedido sigue guardado aquí.", "⚠️");
-  }finally{
-    btn.disabled = false; btn.innerHTML = original;
-  }
-}
-
-// El stock cambió mientras el comprador armaba el pedido.
-function manejarStock(problemas){
-  let txt = "Mientras armabas tu pedido cambió la existencia de estos productos:<br><br>";
-  problemas.forEach(p=>{
-    const nombre = esc(p.n || p.c);
-    if(p.motivo === "agotado")        txt += "• <b>"+nombre+"</b>: se agotó y lo quitamos del pedido.<br>";
-    else if(p.motivo === "stock")     txt += "• <b>"+nombre+"</b>: quedan "+num(p.disponible)+" y ajustamos tu cantidad.<br>";
-    else if(p.motivo === "no_existe") txt += "• <b>"+nombre+"</b>: ya no está disponible y lo quitamos.<br>";
-    else                              txt += "• <b>"+nombre+"</b>: lo quitamos del pedido.<br>";
-
-    const p2 = prod(p.c);
-    if(p.motivo === "stock" && p.disponible > 0){
-      carrito[p.c] = p.disponible;
-      if(p2) p2.m = p.disponible;
-    } else {
-      delete carrito[p.c];
-      if(p2){ p2.m = 0; p2.e = 0; }
+// Cuando llega un catálogo más nuevo: lo que ya no alcanza se ajusta y se avisa.
+function ajustarCarrito(){
+  const cambios = [];
+  Object.keys(carrito).forEach(c => {
+    const p = prod(c), q = carrito[c];
+    if (!p || p.m <= 0){
+      cambios.push("• <b>" + esc(p ? p.n : c) + "</b>: " + (p ? "se agotó" : "ya no está disponible") + " y lo quitamos de tu pedido.");
+      delete carrito[c];
+    } else if (q > p.m){
+      cambios.push("• <b>" + esc(p.n) + "</b>: quedan " + num(p.m) + " y ajustamos tu cantidad.");
+      carrito[c] = p.m;
     }
   });
-  txt += "<br>Revisa tu pedido y vuelve a enviarlo.";
   refrescarPill();
-  document.getElementById("mDatos").classList.remove("on");
-  aviso("La existencia cambió", txt, "⚠️");
-  pintarCarrito();
-  filtrar();
+  if ($("gaveta").classList.contains("on")) pintarCarrito();
+  if (cambios.length)
+    aviso("La existencia cambió",
+      "Actualizamos el catálogo y cambió la existencia de productos de tu pedido:<br><br>" + cambios.join("<br>") +
+      "<br><br>Revisa tu pedido antes de enviarlo.", "⚠️");
 }
 
-function mostrarFinal(res, d){
-  document.getElementById("mDatos").classList.remove("on");
-  document.getElementById("mFinal").classList.add("on");
-  document.getElementById("finTitulo").textContent = "Pedido #" + res.pedido + " registrado";
-  document.getElementById("resDatos").innerHTML = `
+// ══════════ PEDIDO ══════════
+function pedirDatos(){
+  if (!Object.keys(carrito).length) return;
+  if (CAT && CAT.activa === false){
+    aviso("Tienda de demostración", "Esta tienda es una demostración: los pedidos están desactivados. Puedes ver los productos y los precios, pero todavía no se pueden enviar pedidos.", "ℹ️");
+    return;
+  }
+  $("gaveta").classList.remove("on");
+  $("errDatos").classList.remove("on");
+  $("mDatos").classList.add("on");
+  $("velo").classList.add("on");
+  try {
+    const g = JSON.parse(localStorage.getItem("cm_cliente") || "null");
+    if (g){
+      $("f_nom").value = g.nom || ""; $("f_ape").value = g.ape || ""; $("f_tipo").value = g.tipo || "V";
+      $("f_ci").value = g.ci || "";   $("f_tel").value = g.tel || ""; $("f_dir").value = g.dir || "";
+    }
+  } catch(e) {}
+}
+
+// Referencia del pedido: número de 7 dígitos que sale en WhatsApp, en la hoja Pedidos y en la orden de la caja.
+function nuevaRef(){
+  let n;
+  try { const a = new Uint32Array(1); crypto.getRandomValues(a); n = a[0]; }
+  catch(e) { n = Math.floor(Math.random() * 4294967295); }
+  return String(1000000 + (n % 9000000));
+}
+
+function numeroWhatsApp(){
+  let n = String(T.whatsapp || (CAT && CAT.whatsapp) || "").replace(/\D/g, "");
+  if (n.length === 11 && n.charAt(0) === "0") n = "58" + n.slice(1);   // 0414… → 58414…
+  return n;
+}
+
+// Mismo formato que el que armaba el servidor (textoWhatsAppPedido_).
+function textoWhatsApp(ref, d, lineas, total, tasa, totalBs){
+  const negocio = T.negocio || (CAT && CAT.negocio) || "";
+  const mostrar = lineas.slice(0, 8);
+  let t = "Pedido #" + ref + (negocio ? " · " + negocio : "") + "\n";
+  t += d.nom + " " + d.ape + " · " + d.tipo + "-" + d.ci + "\n";
+  if (d.dir) t += "Entrega: " + d.dir + "\n";
+  t += "\n";
+  mostrar.forEach(l => {
+    const nom = l.n.length > 32 ? l.n.slice(0, 32) + "…" : l.n;
+    t += l.q + " x " + nom + " — $" + usd(l.sub) + "\n";
+  });
+  if (lineas.length > mostrar.length)
+    t += "…y " + (lineas.length - mostrar.length) + " productos más (detalle completo en el pedido #" + ref + ")\n";
+  t += "\nTotal: $" + usd(total) + "\n";
+  t += "Tasa BCV: " + usd(tasa) + "\n";
+  t += "Total en Bs: " + usd(totalBs) + "\n\n";
+  t += "El costo del envío se acuerda por este medio.";
+  return t;
+}
+
+function enviarPedido(){
+  const btn = $("btnEnviar");
+  if (btn.disabled) return;
+  const err = $("errDatos");
+  const d = { nom: $("f_nom").value.trim(), ape: $("f_ape").value.trim(), tipo: $("f_tipo").value,
+              ci: $("f_ci").value.replace(/\D/g, ""), tel: $("f_tel").value.trim(), dir: $("f_dir").value.trim() };
+  let falla = "";
+  if (!d.nom || !d.ape) falla = "Escribe tu nombre y tu apellido para identificar el pedido.";
+  else if (d.ci.length < 6) falla = "La cédula debe tener al menos 6 dígitos, sin puntos ni guiones.";
+  else if (d.tel.replace(/\D/g, "").length < 10) falla = "El teléfono debe tener 11 dígitos, empezando por el código de la operadora.";
+  else if (!d.dir) falla = "Indica tu ciudad o zona para poder calcular el envío.";
+  if (falla){ err.textContent = falla; err.classList.add("on"); return; }
+  err.classList.remove("on");
+
+  const items = Object.entries(carrito).filter(([c]) => prod(c));
+  if (!items.length){
+    cerrarTodo();
+    aviso("Tu pedido está vacío", "Agrega productos del catálogo antes de enviar el pedido.", "⚠️");
+    return;
+  }
+
+  const original = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="sp oscuro"></span> Abriendo WhatsApp…';
+
+  const ref     = nuevaRef();
+  const lineas  = items.map(([c, q]) => { const p = prod(c); return { c: c, n: p.n, q: q, pu: p.p, sub: subtotal(p, q) }; });
+  const total   = r2(lineas.reduce((s, l) => s + l.sub, 0));
+  const tasa    = Number(CAT.tasa) || 0;
+  const totalBs = r2(total * tasa);
+
+  // 1) El pedido se guarda en este teléfono y se registra en ControlMaster por detrás.
+  if (T.sistema){
+    const pedido = { ref: ref, nombre: d.nom, apellido: d.ape, tipoDoc: d.tipo, cedula: d.ci,
+                     telefono: d.tel, entrega: d.dir, total: total,
+                     items: lineas.map(l => ({ c: l.c, q: l.q, n: l.n, p: l.pu })) };
+    guardarPendiente(pedido);
+    registrar(pedido);
+  }
+
+  // 2) WhatsApp se abre en este mismo toque: si se espera al servidor, el navegador lo bloquea.
+  const wa  = numeroWhatsApp();
+  const url = wa ? "https://wa.me/" + wa + "?text=" + encodeURIComponent(textoWhatsApp(ref, d, lineas, total, tasa, totalBs)) : "";
+  let abierto = false;
+  if (url){
+    try {
+      const w = window.open(url, "_blank");
+      if (w){ abierto = true; try { w.opener = null; } catch(e) {} }
+    } catch(e) {}
+  }
+
+  try { localStorage.setItem("cm_cliente", JSON.stringify(d)); } catch(e) {}
+  carrito = {};
+  refrescarPill();
+  repintar();
+  mostrarFinal(ref, d, total, tasa, totalBs, url, abierto);
+  btn.disabled = false;
+  btn.innerHTML = original;
+}
+
+function mostrarFinal(ref, d, total, tasa, totalBs, url, abierto){
+  $("mDatos").classList.remove("on");
+  const m = $("mFinal");
+  m.dataset.ref = ref;
+  $("finTitulo").textContent = "Pedido #" + ref;
+  $("finTxt").textContent = !url ? "Tu pedido quedó guardado."
+    : abierto ? "Abrimos WhatsApp con tu pedido ya escrito."
+    : "Toca el botón verde para abrir WhatsApp con tu pedido ya escrito.";
+  $("finPaso").innerHTML = url
+    ? "<b>⚠️ Falta un paso: toca Enviar en WhatsApp</b><span>Tu pedido se confirma cuando la tienda recibe tu mensaje. Ahí acuerdan el envío y la forma de pago.</span>"
+    : "<b>La tienda te escribirá</b><span>Esta tienda todavía no tiene su WhatsApp configurado. Te contactará al teléfono que indicaste.</span>";
+  $("resDatos").innerHTML = `
     <div class="r-l"><span>Cliente</span><span>${esc(d.nom)} ${esc(d.ape)}</span></div>
     <div class="r-l"><span>Cédula</span><span>${esc(d.tipo)}-${esc(d.ci)}</span></div>
     <div class="r-l"><span>Entrega</span><span>${esc(d.dir)}</span></div>
-    <div class="r-l tot"><span>Total</span><span>$${usd(res.total)}</span></div>
-    <div class="r-l"><span>Tasa BCV ${usd(res.tasa)}</span><span>Bs ${usd(res.totalBs)}</span></div>`;
-
-  const wa = document.getElementById("btnWa");
-  wa.href = "https://wa.me/" + (res.whatsapp||"") + "?text=" + encodeURIComponent(res.texto||"");
-  carrito = {};
-  refrescarPill();
+    <div class="r-l tot"><span>Total</span><span>$${usd(total)}</span></div>
+    <div class="r-l"><span>Tasa BCV ${usd(tasa)}</span><span>Bs ${usd(totalBs)}</span></div>`;
+  const wa = $("btnWa");
+  if (url){ wa.style.display = "flex"; wa.href = url; $("btnWaTxt").textContent = abierto ? "Abrir WhatsApp de nuevo" : "Abrir WhatsApp"; }
+  else wa.style.display = "none";
+  $("finListo").textContent = url ? "Ya lo envié por WhatsApp" : "Listo";
+  const est = $("finEstado");
+  est.className = "fin-estado";
+  if (T.sistema){ est.style.display = "flex"; est.innerHTML = '<span class="sp azul"></span><span>Avisándole a la tienda…</span>'; }
+  else est.style.display = "none";
+  m.classList.add("on");
+  $("velo").classList.add("on");
 }
 
-function terminar(){ cerrarTodo(); pintarCarrito(); }
+function estadoFinal(ref, est){
+  const m = $("mFinal");
+  if (m.dataset.ref !== ref) return;
+  const e = $("finEstado");
+  e.className = "fin-estado" + (est === "ok" ? " ok" : "");
+  e.textContent =
+    est === "ok"        ? "✓ La tienda ya tiene tu pedido en su sistema." :
+    est === "inactiva"  ? "Esta tienda no está recibiendo pedidos por la página en este momento. Tu pedido igual va completo en tu mensaje de WhatsApp." :
+    est === "rechazado" ? "El sistema de la tienda no aceptó el pedido por falta de datos. Igual va completo en tu mensaje de WhatsApp." :
+                          "Aún no pudimos avisarle al sistema de la tienda. Lo reintentaremos solo cuando vuelvas a esta página; tu pedido igual va completo en tu mensaje de WhatsApp.";
+}
+
+function terminar(){ cerrarTodo(); }
+
+// ══════════ REGISTRO EN SEGUNDO PLANO ══════════
+// Cada pedido queda guardado en este navegador hasta que ControlMaster confirma que lo recibió.
+// Si se reintenta, el servidor reconoce la referencia y no lo duplica.
+function leerPend(){ try { const a = JSON.parse(localStorage.getItem(K_PEND) || "[]"); return Array.isArray(a) ? a : []; } catch(e) { return []; } }
+function escribirPend(a){ try { localStorage.setItem(K_PEND, JSON.stringify(a)); } catch(e) {} }
+function guardarPendiente(p){ const a = leerPend().filter(x => x.ref !== p.ref); a.push(Object.assign({ intentos: 0, creado: Date.now() }, p)); escribirPend(a); }
+function quitarPendiente(ref){ escribirPend(leerPend().filter(x => x.ref !== ref)); }
+function sumarIntento(ref){ const a = leerPend(); a.forEach(x => { if (x.ref === ref) x.intentos = (x.intentos || 0) + 1; }); escribirPend(a); }
+
+function registrar(p){
+  if (!T.sistema || enVuelo[p.ref]) return;
+  enVuelo[p.ref] = true;
+  const cuerpo = JSON.stringify({ ref: p.ref, nombre: p.nombre, apellido: p.apellido, tipoDoc: p.tipoDoc,
+                                  cedula: p.cedula, telefono: p.telefono, entrega: p.entrega,
+                                  total: p.total, items: p.items });
+  fetch(T.sistema, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: cuerpo,
+    keepalive: cuerpo.length < 60000   // sigue aunque el navegador pase a WhatsApp
+  })
+    .then(r => r.json())
+    .then(res => {
+      if (res && res.ok){ quitarPendiente(p.ref); estadoFinal(p.ref, "ok"); return; }
+      if (res && (res.motivo === "vacio" || res.motivo === "datos" || res.motivo === "inactiva")){ quitarPendiente(p.ref); estadoFinal(p.ref, res.motivo === "inactiva" ? "inactiva" : "rechazado"); return; }
+      throw new Error((res && res.msg) || "Respuesta inesperada");
+    })
+    .catch(() => { sumarIntento(p.ref); estadoFinal(p.ref, "pendiente"); })
+    .finally(() => { delete enVuelo[p.ref]; });
+}
+
+function reintentarPendientes(){
+  if (!T.sistema) return;
+  const ahora = Date.now(), vivos = leerPend().filter(p => (p.intentos || 0) < 8 && ahora - (p.creado || 0) < 3 * 86400000);
+  escribirPend(vivos);
+  vivos.forEach(registrar);
+}
+window.addEventListener("online", reintentarPendientes);
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reintentarPendientes(); });
 
 // ══════════ AVISOS ══════════
 function aviso(tit, html, ico){
-  document.getElementById("avisoTit").textContent = tit;
-  document.getElementById("avisoTxt").innerHTML = html;
-  document.getElementById("avisoIco").textContent = ico || "ℹ️";
-  document.getElementById("mAviso").classList.add("on");
-  document.getElementById("velo").classList.add("on");
+  $("avisoTit").textContent = tit;
+  $("avisoTxt").innerHTML = html;
+  $("avisoIco").textContent = ico || "ℹ️";
+  $("mAviso").classList.add("on");
+  $("velo").classList.add("on");
 }
 function cerrarAviso(){
-  document.getElementById("mAviso").classList.remove("on");
-  if(!document.querySelector(".gaveta.on, #mDatos.on, #mFinal.on")) document.getElementById("velo").classList.remove("on");
+  $("mAviso").classList.remove("on");
+  if (!document.querySelector(".gaveta.on, #mDatos.on, #mFinal.on")) $("velo").classList.remove("on");
 }
 function cerrarModales(){
-  document.getElementById("mDatos").classList.remove("on");
-  document.getElementById("mFinal").classList.remove("on");
+  $("mDatos").classList.remove("on");
+  $("mFinal").classList.remove("on");
   abrirCarrito();
 }
 function cerrarTodo(){
-  document.querySelectorAll(".gaveta,.modal").forEach(e=>e.classList.remove("on"));
-  document.getElementById("velo").classList.remove("on");
+  document.querySelectorAll(".gaveta,.modal").forEach(e => e.classList.remove("on"));
+  $("velo").classList.remove("on");
 }
 
 let tToast;
 function toast(msg){
-  const t = document.getElementById("toast");
+  const t = $("toast");
   t.textContent = msg; t.classList.add("on");
-  clearTimeout(tToast); tToast = setTimeout(()=>t.classList.remove("on"), 2200);
+  clearTimeout(tToast); tToast = setTimeout(() => t.classList.remove("on"), 2200);
 }
 
-document.addEventListener("wheel", e=>{
-  if(document.activeElement && document.activeElement.type === "number" && document.activeElement === e.target)
-    document.activeElement.blur();
-}, {passive:true});
-document.addEventListener("keydown", e=>{ if(e.key === "Escape") cerrarTodo(); });
+// Ningún input numérico cambia con la rueda del mouse
+document.addEventListener("wheel", e => {
+  const a = document.activeElement;
+  if (a && a.type === "number" && a === e.target) a.blur();
+}, { passive: true });
+document.addEventListener("keydown", e => { if (e.key === "Escape") cerrarTodo(); });
 
 cargar();
 </script>
