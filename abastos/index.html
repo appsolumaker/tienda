@@ -799,7 +799,6 @@ function agregarConToque(card, c){
   agregar(c);
   if ((carrito[c] || 0) <= antes) return;                  // no había más existencia (ya salió el aviso)
   const f = card.querySelector(".foto-caja");
-  if (f){ const b = document.createElement("span"); b.className = "mas-uno"; b.textContent = "+1"; f.appendChild(b); setTimeout(() => b.remove(), 750); }
   if (antes) toast(num(carrito[c]) + " × " + p.nv.slice(0, 26) + (p.nv.length > 26 ? "…" : "") + " en tu pedido");
 }
 
