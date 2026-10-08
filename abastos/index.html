@@ -45,6 +45,13 @@ window.TIENDA = {
   if (!T.negocio) T.negocio = (q.get("n") || "").trim();
   T.fotos          = "https://fotos.micontrolmaster.com";
   T.logo           = T.cliente ? T.fotos + "/" + T.cliente + "/logo.webp" : "";
+  T.logoBase       = T.logo;
+  // Si el logo cambió, el catálogo trae su versión: así no se ve el viejo guardado en caché.
+  try {
+    var cc = JSON.parse(localStorage.getItem("cm_cat_" + (T.cliente || T.sistema)) || "null");
+    var lv = cc && cc.tienda && cc.tienda.logoV;
+    if (T.logo && lv) T.logo = T.logoBase + "?v=" + lv;
+  } catch (e) {}
   T.catalogoRapido = T.cliente ? T.fotos + "/" + T.cliente + "/catalogo.json" : "";
   T.clave          = T.cliente || T.sistema;
   if (T.logo) {
@@ -527,7 +534,7 @@ body.con-barra .pie-credito{padding-bottom:calc(92px + env(safe-area-inset-botto
       <div class="opciones" id="opcEntrega" role="radiogroup" aria-labelledby="etEntrega"></div>
     </div>
     <div class="cond" id="bqDelivery" hidden>
-      <div class="campo" id="c_ciuD" hidden><label for="f_ciuD">Ciudad</label><select id="f_ciuD"><option value="">Selecciona tu ciudad</option></select></div>
+      <div class="campo" id="c_ciuD" hidden><label for="f_ciuD">Ubicación</label><select id="f_ciuD"><option value="">Selecciona tu ubicación</option></select></div>
       <div class="campo" id="c_dir"><label for="f_dirE">Dirección exacta</label><textarea id="f_dirE" maxlength="300" placeholder="Sector o urbanización, calle, casa o edificio"></textarea></div>
       <div class="campo" id="c_ref"><label for="f_ref">Punto de referencia</label><input id="f_ref" maxlength="200" placeholder="Ej: Frente a la plaza, portón negro"></div>
     </div>
@@ -598,6 +605,18 @@ const K_CAT  = "cm_cat_"  + T.clave;   // último catálogo visto (pinta al inst
 const K_PEND = "cm_pend_" + T.clave;   // pedidos que aún no llegaron a ControlMaster
 
 let CAT = null, INDICE = {}, filtrados = [], categoria = "", pintados = 0, carrito = {};
+// El pedido en armado se recuerda en este teléfono (3 días): recargar la página no lo borra.
+const K_CARRITO = "cm_car_" + T.clave;
+try {
+  const g = JSON.parse(localStorage.getItem(K_CARRITO) || "null");
+  if (g && g.c && typeof g.c === "object" && Date.now() - (g.t || 0) < 3 * 86400000) carrito = g.c;
+} catch(e) {}
+function guardarCarrito(){
+  try {
+    if (Object.keys(carrito).length) localStorage.setItem(K_CARRITO, JSON.stringify({ t: Date.now(), c: carrito }));
+    else localStorage.removeItem(K_CARRITO);
+  } catch(e) {}
+}
 const enVuelo = {};
 
 function $(id){ return document.getElementById(id); }
@@ -644,9 +663,13 @@ const REDES = {
   youtube:   { n: "YouTube",   url: u => "https://www.youtube.com/@" + u,
     svg: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M21.6 7.2a2.6 2.6 0 00-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4a2.6 2.6 0 00-1.8 1.8C2 8.8 2 12 2 12s0 3.2.4 4.8a2.6 2.6 0 001.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.6 2.6 0 001.8-1.8c.4-1.6.4-4.8.4-4.8s0-3.2-.4-4.8zM10 15V9l5.2 3L10 15z"/></svg>' }
 };
+function esMovil(){
+  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ||
+         (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform || ""));
+}
 function redesHTML(r){
   return Object.keys(REDES).filter(k => r && r[k]).map(k =>
-    '<a class="red" href="' + esc(REDES[k].url(r[k])) + '" target="_blank" rel="noopener" aria-label="' + REDES[k].n + '" title="' + REDES[k].n + '">' + REDES[k].svg + '</a>').join("");
+    '<a class="red" href="' + esc(REDES[k].url(r[k])) + '"' + (esMovil() ? '' : ' target="_blank"') + ' rel="noopener" aria-label="' + REDES[k].n + '" title="' + REDES[k].n + '">' + REDES[k].svg + '</a>').join("");
 }
 function pintarTienda(d){
   const tc = d.tienda || {}, frase = tc.frase || "";
@@ -661,7 +684,11 @@ function pintarTienda(d){
   if (wa) $("pieWa").href = ayuda;
   const nom = tc.nombre || T.negocio || d.negocio || "";
   $("pieCredito").href = "https://wa.me/584121463316?text=" + encodeURIComponent("Hola, vi la tienda online de " + (nom || "un negocio") + " y quiero una para mi negocio.");
-  const logo = $("logo");
+  const lv = Number(tc.logoV) || 0, logo = $("logo");
+  if (logo && T.logoBase && lv){
+    const nueva = T.logoBase + "?v=" + lv;
+    if (logo.getAttribute("src") !== nueva){ logo.src = nueva; T.logo = nueva; }
+  }
   if (logo && logo.src && !window._sinLogo){ $("pieLogo").src = logo.src; $("pieLogo").alt = nom; $("pieLogo").hidden = false; }
 }
 
@@ -806,7 +833,7 @@ function aplicarCatalogo(d){
     cats.map(c => '<button class="chip" data-cat="' + esc(c) + '" aria-pressed="' + (c === categoria) + '">' + esc(nombre(c)) + '</button>').join("");
 
   $("estado").style.display = "none";
-  if (primera) filtrar();
+  if (primera){ if (Object.keys(carrito).length) ajustarCarrito(); else refrescarPedido(); filtrar(); }
   else { ajustarCarrito(); repintar(); }
 }
 
@@ -956,6 +983,7 @@ function agregar(cod){
 
 // Contador, total del botón de arriba y barra flotante
 function refrescarPedido(){
+  guardarCarrito();
   const unidades = Object.values(carrito).reduce((a, b) => a + b, 0);
   const total = totalUSD();
   $("pillCant").textContent = num(unidades);
@@ -1174,7 +1202,7 @@ function leerDatos(){
     if (t === "delivery"){
       const cds = ciudadesDelivery();
       d.env = { tipo: "delivery", ciudad: cds.length === 1 ? cds[0] : $("f_ciuD").value, direccion: v("f_dirE"), referencia: v("f_ref") };
-      if (cds.length > 1 && !d.env.ciudad) f.push(["c_ciuD", "Selecciona la ciudad donde quieres recibir el delivery."]);
+      if (cds.length > 1 && !d.env.ciudad) f.push(["c_ciuD", "Selecciona la ubicación donde quieres recibir el delivery."]);
       if (d.env.direccion.length < 10) f.push(["c_dir", "Escribe tu dirección completa: sector o urbanización, calle y casa o edificio."]);
       if (d.env.referencia.length < 4) f.push(["c_ref", "Escribe un punto de referencia cercano a tu dirección."]);
       d.dir = "Delivery" + (d.env.ciudad ? " en " + d.env.ciudad : "") + ": " + d.env.direccion + (d.env.referencia ? " (Ref: " + d.env.referencia + ")" : "");
@@ -1363,7 +1391,7 @@ function abrirWhatsApp(url){
   try { const w = window.open(url, "_blank"); if (w){ try { w.opener = null; } catch(e) {} return true; } } catch(e) {}
   return false;
 }
-if (MOVIL) ["btnWa", "promoWa"].forEach(id => { const a = $(id); if (a) a.removeAttribute("target"); });
+if (MOVIL) ["btnWa", "promoWa", "pieWa", "pieCredito"].forEach(id => { const a = $(id); if (a) a.removeAttribute("target"); });
 
 // Al volver de WhatsApp se cierra sola la pantalla final (si el aviso a la tienda no tuvo problema).
 let ultimoEstado = null, fueraEnWhatsApp = false;
