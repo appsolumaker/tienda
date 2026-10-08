@@ -194,7 +194,12 @@ main{max-width:1120px;margin:0 auto;padding:18px 16px 40px}
 @media(min-width:620px){.rejilla{grid-template-columns:repeat(3,1fr);gap:16px}}
 @media(min-width:920px){.rejilla{grid-template-columns:repeat(4,1fr)}}
 
-.card{background:var(--carta);border:1px solid var(--linea);border-radius:var(--radio);overflow:hidden;display:flex;flex-direction:column}
+.card{background:var(--carta);border:1px solid var(--linea);border-radius:var(--radio);overflow:hidden;display:flex;flex-direction:column;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+.mas-uno{position:absolute;left:50%;top:50%;z-index:2;font-weight:800;font-size:28px;line-height:1;color:var(--pri-texto);background:var(--pri);
+  border-radius:999px;padding:8px 16px;pointer-events:none;box-shadow:0 6px 18px rgba(0,0,0,.22);animation:masUno .75s ease-out forwards}
+@keyframes masUno{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}25%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-110%) scale(1)}}
+@media(prefers-reduced-motion:reduce){.mas-uno{animation-duration:.01s}}
 .card.sin .foto-caja img{filter:grayscale(1);opacity:.45}
 .card.sin .nom{color:var(--texto-2)}
 .card.sin .precio{color:var(--texto-2);font-weight:700}
@@ -439,7 +444,6 @@ body.con-barra footer .foot-in{padding-bottom:calc(96px + env(safe-area-inset-bo
         <input id="f_ci" inputmode="numeric" placeholder="Solo números" maxlength="10">
       </div>
     </div>
-    <div class="campo" id="c_tel"><label for="f_tel">Teléfono (WhatsApp)</label><input id="f_tel" type="tel" inputmode="numeric" placeholder="0414-1234567" autocomplete="tel" maxlength="12"></div>
     <div class="campo" id="c_correo"><label for="f_correo">Correo <span class="opc">(opcional)</span></label><input id="f_correo" type="email" inputmode="email" placeholder="Para recibir la confirmación" autocomplete="email" maxlength="100"></div>
 
     <div class="campo" id="c_entrega" hidden>
@@ -710,7 +714,8 @@ function filtrar(){
   if (!filtrados.length) mostrarEstado("<b>Sin resultados</b>Prueba con otro nombre o revisa las categorías.");
   else $("estado").style.display = "none";
   $("conteo").textContent = filtrados.length
-    ? filtrados.length + (filtrados.length > 1 ? " productos" : " producto") + (categoria ? " en " + nombre(categoria) : "")
+    ? filtrados.length + (filtrados.length > 1 ? " productos" : " producto") + (categoria ? " en " + nombre(categoria) : "") +
+      (window.matchMedia && matchMedia("(pointer:coarse)").matches ? " · Toca dos veces un producto para agregarlo" : "")
     : "";
   pintarLote();
 }
@@ -771,6 +776,32 @@ $("rejilla").addEventListener("click", e => {
   if (b.dataset.acc === "mas") agregar(b.dataset.c);
   else cambiar(b.dataset.c, -1);
 });
+
+// Doble toque sobre un producto = agrega una unidad (como el "me gusta" de Instagram).
+// Los botones de la tarjeta no cuentan; si el dedo se movió (scroll), tampoco.
+let toqueAnt = { c: "", t: 0, x: 0, y: 0 };
+$("rejilla").addEventListener("pointerup", e => {
+  if (e.pointerType === "mouse" && e.button !== 0) return;
+  if (e.target.closest("button, a, input")) return;
+  const card = e.target.closest(".card[data-c]");
+  if (!card) return;
+  const ahora = Date.now(), c = card.dataset.c;
+  if (toqueAnt.c === c && ahora - toqueAnt.t < 380 && Math.abs(e.clientX - toqueAnt.x) < 30 && Math.abs(e.clientY - toqueAnt.y) < 30){
+    toqueAnt = { c: "", t: 0, x: 0, y: 0 };
+    agregarConToque(card, c);
+  } else toqueAnt = { c: c, t: ahora, x: e.clientX, y: e.clientY };
+});
+function agregarConToque(card, c){
+  const p = prod(c);
+  if (!p) return;
+  if (p.e === 0 || p.m <= 0){ toast("Este producto está agotado"); return; }
+  const antes = carrito[c] || 0;
+  agregar(c);
+  if ((carrito[c] || 0) <= antes) return;                  // no había más existencia (ya salió el aviso)
+  const f = card.querySelector(".foto-caja");
+  if (f){ const b = document.createElement("span"); b.className = "mas-uno"; b.textContent = "+1"; f.appendChild(b); setTimeout(() => b.remove(), 750); }
+  if (antes) toast(num(carrito[c]) + " × " + p.nv.slice(0, 26) + (p.nv.length > 26 ? "…" : "") + " en tu pedido");
+}
 
 window.addEventListener("scroll", () => {
   if (!CAT || pintados >= filtrados.length) return;
@@ -919,7 +950,7 @@ function pedirDatos(){
   if (g){
     const e = g.env || {};
     $("f_nom").value = g.nom || ""; $("f_ape").value = g.ape || ""; $("f_tipo").value = g.tipo || "V";
-    $("f_ci").value = g.ci || "";   $("f_tel").value = formatoTel(g.tel || ""); $("f_correo").value = g.correo || "";
+    $("f_ci").value = g.ci || "";   $("f_correo").value = g.correo || "";
     $("f_dir").value = g.libre || (g.env ? "" : (g.dir || ""));
     $("f_dirE").value = e.tipo === "delivery" ? (e.direccion || "") : "";
     $("f_ref").value  = e.tipo === "delivery" ? (e.referencia || "") : "";
@@ -982,14 +1013,13 @@ function limpiarErroresDatos(){ document.querySelectorAll("#mDatos .campo.mal").
 function leerDatos(){
   const v = id => $(id).value.trim().replace(/\s+/g, " ");
   const d = { nom: v("f_nom"), ape: v("f_ape"), tipo: $("f_tipo").value, ci: $("f_ci").value.replace(/\D/g, ""),
-              tel: v("f_tel"), correo: v("f_correo").toLowerCase(), env: null, libre: "", dir: "" };
+              tel: "", correo: v("f_correo").toLowerCase(), env: null, libre: "", dir: "" };
   const f = [];
   if (!d.nom) f.push(["c_nom", "Escribe tu nombre."]);
   else if (/\d/.test(d.nom)) f.push(["c_nom", "El nombre no debe llevar números."]);
   if (!d.ape) f.push(["c_ape", "Escribe tu apellido."]);
   else if (/\d/.test(d.ape)) f.push(["c_ape", "El apellido no debe llevar números."]);
   if (d.ci.length < 6 || d.ci.length > 10) f.push(["c_ci", "La cédula debe tener entre 6 y 10 dígitos, sin puntos ni letras."]);
-  if (!/^04\d{9}$/.test(d.tel.replace(/\D/g, ""))) f.push(["c_tel", "El teléfono debe ser un celular con el formato 0414-1234567."]);
   if (d.correo && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.correo)) f.push(["c_correo", "Ese correo no parece válido. Revísalo o déjalo vacío."]);
 
   const e = entregaCfg();
@@ -1023,7 +1053,6 @@ function leerDatos(){
   const sel = $("f_edo");
   ESTADOS_VE.forEach(x => sel.add(new Option(x, x)));
   $("opcEntrega").addEventListener("change", verEntrega);
-  $("f_tel").addEventListener("input", e => { e.target.value = formatoTel(e.target.value); });
   $("f_ci").addEventListener("input", e => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10); });
   const quitar = e => { const c = e.target.closest(".campo"); if (c) c.classList.remove("mal"); };
   $("mDatos").addEventListener("input", quitar);
