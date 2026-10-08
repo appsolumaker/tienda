@@ -215,10 +215,11 @@ main{max-width:1120px;margin:0 auto;padding:18px 16px 40px}
 .etq.poco{background:#FFF4D6;color:#6B4E00;border-color:#EBCB7A}
 .etq.no{background:#FDECE8;color:var(--rojo);border-color:#F4C2B8}
 .card-b{padding:12px;display:flex;flex-direction:column;gap:3px;flex:1}
-.nom{font-size:14px;font-weight:600;line-height:1.35;margin:0;min-height:38px;
+.nom{font-size:16px;font-weight:600;line-height:1.35;margin:0;min-height:43px;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.precio{font-weight:800;font-size:21px;letter-spacing:-.5px;margin-top:6px}
-.bs{font-size:12px;color:var(--texto-2);margin-top:-2px}
+.precio{font-weight:800;font-size:25px;line-height:1.15;letter-spacing:-.5px;margin-top:8px}
+.bs{font-size:16px;font-weight:700;color:var(--texto);opacity:.78;margin-top:1px}
+.card.sin .bs{font-weight:500}
 .accion{margin-top:12px;height:42px}
 .add{width:100%;height:100%;background:var(--acento);color:var(--acento-texto);font-weight:800;border-radius:var(--radio-btn);
   display:flex;align-items:center;justify-content:center;gap:7px;font-size:14px}
@@ -893,22 +894,21 @@ function numeroWhatsApp(){
 
 // Mismo formato que el que armaba el servidor (textoWhatsAppPedido_).
 function textoWhatsApp(ref, d, lineas, total, tasa, totalBs){
-  const negocio = T.negocio || (CAT && CAT.negocio) || "";
-  const mostrar = lineas.slice(0, 8);
-  let t = "Pedido #" + ref + (negocio ? " · " + negocio : "") + "\n";
-  t += d.nom + " " + d.ape + " · " + d.tipo + "-" + d.ci + "\n";
-  if (d.dir) t += "Entrega: " + d.dir + "\n";
-  t += "\n";
-  mostrar.forEach(l => {
-    const nom = l.n.length > 32 ? l.n.slice(0, 32) + "…" : l.n;
-    t += l.q + " x " + nom + " — $" + usd(l.sub) + "\n";
-  });
+  const MAX_LINEAS = 15, MAX_LETRAS = 40;
+  const mostrar = lineas.slice(0, MAX_LINEAS);
+  // Array.from corta por letra completa: un emoji en el nombre nunca queda partido (eso sale como "�")
+  const corto = s => { const a = Array.from(String(s)); return a.length > MAX_LETRAS ? a.slice(0, MAX_LETRAS).join("").trim() + "…" : String(s); };
+  let t = "Hola 👋 Quiero hacer este pedido:\n\n";
+  t += "🛒 *PEDIDO #" + ref + "*\n\n";
+  mostrar.forEach(l => { t += l.q + " x " + corto(l.n) + " — $" + usd(l.sub) + "\n"; });
   if (lineas.length > mostrar.length)
     t += "…y " + (lineas.length - mostrar.length) + " productos más (detalle completo en el pedido #" + ref + ")\n";
-  t += "\nTotal: $" + usd(total) + "\n";
-  t += "Tasa BCV: " + usd(tasa) + "\n";
-  t += "Total en Bs: " + usd(totalBs) + "\n\n";
-  t += "El costo del envío se acuerda por este medio.";
+  t += "\n💵 *Total USD:* $" + usd(total) + "\n";
+  t += "💱 *Tasa BCV:* " + usd(tasa) + "\n";
+  t += "💰 *Total Bs:* " + usd(totalBs) + "\n\n";
+  t += "👤 *Cliente:* " + d.nom + " " + d.ape + " · " + d.tipo + "-" + d.ci + "\n";
+  if (d.dir) t += "📍 *Entrega:* " + d.dir + "\n";
+  t += "\nQuedo atento para coordinar el pago y la entrega. ¡Gracias!";
   return t;
 }
 
