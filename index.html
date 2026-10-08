@@ -196,10 +196,6 @@ main{max-width:1120px;margin:0 auto;padding:18px 16px 40px}
 
 .card{background:var(--carta);border:1px solid var(--linea);border-radius:var(--radio);overflow:hidden;display:flex;flex-direction:column;
   touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
-.mas-uno{position:absolute;left:50%;top:50%;z-index:2;font-weight:800;font-size:28px;line-height:1;color:var(--pri-texto);background:var(--pri);
-  border-radius:999px;padding:8px 16px;pointer-events:none;box-shadow:0 6px 18px rgba(0,0,0,.22);animation:masUno .75s ease-out forwards}
-@keyframes masUno{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}25%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-110%) scale(1)}}
-@media(prefers-reduced-motion:reduce){.mas-uno{animation-duration:.01s}}
 .card.sin .foto-caja img{filter:grayscale(1);opacity:.45}
 .card.sin .nom{color:var(--texto-2)}
 .card.sin .precio{color:var(--texto-2);font-weight:700}
@@ -798,7 +794,6 @@ function agregarConToque(card, c){
   const antes = carrito[c] || 0;
   agregar(c);
   if ((carrito[c] || 0) <= antes) return;                  // no había más existencia (ya salió el aviso)
-  const f = card.querySelector(".foto-caja");
   if (antes) toast(num(carrito[c]) + " × " + p.nv.slice(0, 26) + (p.nv.length > 26 ? "…" : "") + " en tu pedido");
 }
 
