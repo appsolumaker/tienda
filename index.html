@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Abastos · Catálogo</title>
+<title>Catálogo online</title>
 <!-- Vista previa al compartir el enlace por WhatsApp o Instagram.
      En la copia de cada cliente: cambia título y descripción, y quita el comentario de og:image
      poniendo la dirección del logo (si la vista previa no muestra la imagen, usa un JPG o PNG). -->
-<meta property="og:title" content="Abastos · Catálogo online">
+<meta property="og:title" content="Catálogo online">
 <meta property="og:description" content="Mira nuestros productos y haz tu pedido por WhatsApp.">
-<meta property="og:image" content="https://fotos.micontrolmaster.com/abastos/logo.webp">
+<!-- <meta property="og:image" content="https://fotos.micontrolmaster.com/IDENTIFICADOR/logo.webp"> -->
 <meta name="theme-color" content="#1B45E0" id="metaTema">
 <script>
 // ══════════════════════════════════════════════════════════════
@@ -17,14 +17,14 @@
 //  Más adelante el Worker de MiTiendaMaster llenará este bloque solo.
 // ══════════════════════════════════════════════════════════════
 window.TIENDA = {
-  negocio:       "Abastos",     // ← nombre del negocio (sale arriba al instante)
+  negocio:       "",     // ← nombre del negocio (sale arriba al instante)
   mostrarNombre: true,   // ← false si el logo ya trae el nombre escrito
-  cliente:       "abastos",     // ← identificador del cliente (Configuración H34)
-  sistema:       "https://script.google.com/macros/s/AKfycbyWh9eVrJ2Xo5ZHHb2Pi40KBthK7Q4ufCO1nPB--PM2ojFJ9fsbeOn14zRiZUqpg4af/exec",     // ← URL /exec de ControlMaster del cliente
+  cliente:       "",     // ← identificador del cliente (Configuración H34)
+  sistema:       "",     // ← URL /exec de ControlMaster del cliente
   whatsapp:      "",     // ← opcional: WhatsApp de la tienda (ej. 584141234567). Vacío = el de ControlMaster
 
   // ── Aspecto ──
-  tema:     "abasto",    // tema listo: solumaker · abasto · ferreteria · repuestos · comida · boutique
+  tema:     "solumaker", // tema listo: solumaker · abasto · ferreteria · repuestos · comida · boutique
                          // o a la medida: { base:"abasto", primario:"#1E7B3A", acento:"#F5B700", fondo:"#F4F7F1",
                          //                  estilo:"suave", fuente:"Nunito", encabezado:"color" }
                          //   estilo: suave · recto · pastilla   ·   encabezado: claro · color
