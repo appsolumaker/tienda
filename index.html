@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Catálogo online</title>
+<title>Abastos · Catálogo</title>
 <!-- Vista previa al compartir el enlace por WhatsApp o Instagram.
      En la copia de cada cliente: cambia título y descripción, y quita el comentario de og:image
      poniendo la dirección del logo (si la vista previa no muestra la imagen, usa un JPG o PNG). -->
-<meta property="og:title" content="Catálogo online">
+<meta property="og:title" content="Abastos · Catálogo online">
 <meta property="og:description" content="Mira nuestros productos y haz tu pedido por WhatsApp.">
-<!-- <meta property="og:image" content="https://fotos.micontrolmaster.com/IDENTIFICADOR/logo.webp"> -->
+<meta property="og:image" content="https://fotos.micontrolmaster.com/abastos/logo.webp">
 <meta name="theme-color" content="#1B45E0" id="metaTema">
 <script>
 // ══════════════════════════════════════════════════════════════
@@ -17,14 +17,14 @@
 //  Más adelante el Worker de MiTiendaMaster llenará este bloque solo.
 // ══════════════════════════════════════════════════════════════
 window.TIENDA = {
-  negocio:       "",     // ← nombre del negocio (sale arriba al instante)
+  negocio:       "Abastos",     // ← nombre del negocio (sale arriba al instante)
   mostrarNombre: true,   // ← false si el logo ya trae el nombre escrito
-  cliente:       "",     // ← identificador del cliente (Configuración H34)
-  sistema:       "",     // ← URL /exec de ControlMaster del cliente
+  cliente:       "abastos",     // ← identificador del cliente (Configuración H34)
+  sistema:       "https://script.google.com/macros/s/AKfycbyWh9eVrJ2Xo5ZHHb2Pi40KBthK7Q4ufCO1nPB--PM2ojFJ9fsbeOn14zRiZUqpg4af/exec",     // ← URL /exec de ControlMaster del cliente
   whatsapp:      "",     // ← opcional: WhatsApp de la tienda (ej. 584141234567). Vacío = el de ControlMaster
 
   // ── Aspecto ──
-  tema:     "solumaker", // tema listo: solumaker · abasto · ferreteria · repuestos · comida · boutique
+  tema:     "abasto",    // tema listo: solumaker · abasto · ferreteria · repuestos · comida · boutique
                          // o a la medida: { base:"abasto", primario:"#1E7B3A", acento:"#F5B700", fondo:"#F4F7F1",
                          //                  estilo:"suave", fuente:"Nunito", encabezado:"color" }
                          //   estilo: suave · recto · pastilla   ·   encabezado: claro · color
@@ -388,6 +388,8 @@ body.con-barra .pie-credito{padding-bottom:calc(92px + env(safe-area-inset-botto
 .agencia input:checked + span{background:var(--pri);border-color:var(--pri);color:var(--pri-texto)}
 .agencia input:focus-visible + span{outline:2px solid var(--pri);outline-offset:2px}
 .cond{border-top:1px dashed var(--linea);margin-top:11px;padding-top:11px}
+.dlv-costo{background:var(--pri-suave);color:var(--pri-sobre-suave);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.5;margin:0 0 11px}
+.dlv-costo[hidden]{display:none}
 .campo.mal input,.campo.mal select,.campo.mal textarea,.campo.mal .opcion > span,.campo.mal .agencia span{border-color:var(--rojo)}
 .err{color:var(--rojo);font-size:12.5px;margin:2px 0 10px;display:none;line-height:1.4}
 .err.on{display:block}
@@ -535,6 +537,7 @@ body.con-barra .pie-credito{padding-bottom:calc(92px + env(safe-area-inset-botto
     </div>
     <div class="cond" id="bqDelivery" hidden>
       <div class="campo" id="c_ciuD" hidden><label for="f_ciuD">Ubicación</label><select id="f_ciuD"><option value="">Selecciona tu ubicación</option></select></div>
+      <div class="dlv-costo" id="dlvCosto" hidden></div>
       <div class="campo" id="c_dir"><label for="f_dirE">Dirección exacta</label><textarea id="f_dirE" maxlength="300" placeholder="Sector o urbanización, calle, casa o edificio"></textarea></div>
       <div class="campo" id="c_ref"><label for="f_ref">Punto de referencia</label><input id="f_ref" maxlength="200" placeholder="Ej: Frente a la plaza, portón negro"></div>
     </div>
@@ -1030,7 +1033,7 @@ function pintarCarrito(){
   pie.innerHTML = `
     <div class="totales grande"><span>Total</span><span>$${usd(t)}</span></div>
     <div class="totales"><span>En bolívares (tasa ${usd(CAT.tasa)})</span><span>Bs ${bs(t)}</span></div>
-    <p class="nota">El envío no está incluido. Se acuerda contigo por WhatsApp según tu zona.</p>
+    <p class="nota">El costo del delivery o del envío lo ves en el siguiente paso, según cómo quieras recibir tu pedido.</p>
     <button class="btn-wa" onclick="pedirDatos()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2zm0 18a8 8 0 01-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1112 20zm4.4-5.8c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 01-3.2-2.8c-.1-.2 0-.4.1-.5l.4-.5c.1-.2.1-.3 0-.5l-.7-1.6c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3a2.9 2.9 0 00-.9 2.1c0 1.3.9 2.5 1 2.6a10 10 0 003.9 3.4c1.8.7 1.8.5 2.2.5.3 0 1.2-.5 1.4-1 .2-.5.2-.9.1-1z"/></svg>
       Finalizar pedido por WhatsApp
@@ -1128,6 +1131,29 @@ const ESTADOS_VE = ["Amazonas","Anzoátegui","Apure","Aragua","Barinas","Bolíva
   "Distrito Capital","Falcón","Guárico","La Guaira","Lara","Mérida","Miranda","Monagas","Nueva Esparta","Portuguesa",
   "Sucre","Táchira","Trujillo","Yaracuy","Zulia"];
 function entregaCfg(){ return (CAT && CAT.tienda && CAT.tienda.entrega) || {}; }
+// Precio del delivery de una ubicación, en $ a tasa BCV (0 = se acuerda por WhatsApp)
+function precioZona(nombre){
+  const n = String(nombre || "").toLowerCase();
+  const z = (entregaCfg().zonas || []).find(x => String(x.n || "").toLowerCase() === n);
+  return z ? r2(z.p) : 0;
+}
+function hayPreciosDelivery(){ return (entregaCfg().zonas || []).some(z => Number(z.p) > 0); }
+function textoCostoZona(p){ return p > 0 ? "$" + usd(p) + " · Bs " + bs(p) : "se acuerda por WhatsApp"; }
+function notaNacional(){ return entregaCfg().nacionalCobro === "cotizar" ? "Te cotizamos el envío según el peso." : "El envío lo pagas al retirar en la agencia."; }
+// Muestra el costo del delivery y el total con delivery mientras el comprador llena sus datos
+function pintarCostoDelivery(){
+  const box = $("dlvCosto");
+  if (!box) return;
+  if (radioVal("entrega") !== "delivery"){ box.hidden = true; return; }
+  const cds = ciudadesDelivery(), zona = cds.length === 1 ? cds[0] : $("f_ciuD").value;
+  if (!zona){ box.hidden = true; return; }
+  const p = precioZona(zona), tot = r2(totalUSD() + p);
+  box.hidden = false;
+  box.innerHTML = p > 0
+    ? "🛵 <b>Delivery a " + esc(zona) + ":</b> $" + usd(p) + " · Bs " + bs(p) +
+      "<br><b>Total con delivery: $" + usd(tot) + " · Bs " + bs(tot) + "</b>"
+    : "🛵 El costo del delivery a <b>" + esc(zona) + "</b> se acuerda contigo por WhatsApp.";
+}
 function listaY(a){ return a.length < 2 ? (a[0] || "") : a.slice(0, -1).join(", ") + " o " + a[a.length - 1]; }
 function ciudadesDelivery(){
   const e = entregaCfg();
@@ -1137,8 +1163,9 @@ function opcionesEntrega(){
   const e = entregaCfg(), o = [], ags = e.agencias || [], cds = ciudadesDelivery();
   if (e.retiro)   o.push({ v: "retiro",   t: "Retiro en tienda", s: e.direccionRetiro ? "Retiras en: " + e.direccionRetiro : "Lo buscas en nuestra tienda." });
   if (e.delivery) o.push({ v: "delivery", t: "Delivery" + (cds.length === 1 ? " en " + cds[0] : ""),
-                           s: cds.length > 1 ? "En " + listaY(cds) + ". Te lo llevamos a tu dirección." : "Te lo llevamos a tu dirección." });
-  if (e.nacional && ags.length) o.push({ v: "nacional", t: "Envío nacional", s: "Por " + listaY(ags) + ". Retiras en la oficina de la agencia." });
+                           s: (cds.length > 1 ? "En " + listaY(cds) + ". Te lo llevamos a tu dirección." : "Te lo llevamos a tu dirección.") +
+                              (cds.length === 1 ? " Costo: " + textoCostoZona(precioZona(cds[0])) + "." : (hayPreciosDelivery() ? " El costo depende de tu ubicación." : "")) });
+  if (e.nacional && ags.length) o.push({ v: "nacional", t: "Envío nacional", s: "Por " + listaY(ags) + ". Retiras en la oficina de la agencia. " + notaNacional() });
   return o;
 }
 function radioVal(nombre){ const r = document.querySelector('#mDatos input[name="' + nombre + '"]:checked'); return r ? r.value : ""; }
@@ -1156,7 +1183,7 @@ function prepararEntrega(g){
   document.querySelectorAll('#opcEntrega input').forEach(r => { r.checked = r.value === tipo; });
   const cds = ciudadesDelivery(), sc = $("f_ciuD");
   sc.length = 1;
-  cds.forEach(x => sc.add(new Option(x, x)));
+  cds.forEach(x => { const p = precioZona(x); sc.add(new Option(x + (p > 0 ? " — $" + usd(p) + " · Bs " + bs(p) : ""), x)); });
   $("c_ciuD").hidden = cds.length < 2;
   sc.value = cds.length === 1 ? cds[0] : (e.tipo === "delivery" && cds.indexOf(e.ciudad) >= 0 ? e.ciudad : "");
   const ag = ags.length === 1 ? ags[0] : e.agencia;
@@ -1167,6 +1194,7 @@ function verEntrega(){
   const t = radioVal("entrega");
   $("bqDelivery").hidden = t !== "delivery";
   $("bqNacional").hidden = t !== "nacional";
+  pintarCostoDelivery();
 }
 function formatoTel(v){
   let d = String(v || "").replace(/\D/g, "");
@@ -1223,6 +1251,7 @@ function leerDatos(){
   const sel = $("f_edo");
   ESTADOS_VE.forEach(x => sel.add(new Option(x, x)));
   $("opcEntrega").addEventListener("change", verEntrega);
+  $("f_ciuD").addEventListener("change", pintarCostoDelivery);
   $("f_ci").addEventListener("input", e => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10); });
   const quitar = e => { const c = e.target.closest(".campo"); if (c) c.classList.remove("mal"); };
   $("mDatos").addEventListener("input", quitar);
@@ -1247,7 +1276,7 @@ function numeroWhatsApp(){
 function textoWhatsApp(ref, d, lineas, total, tasa, totalBs){
   const MAX_LINEAS = 15, MAX_LETRAS = 40;
   const mostrar = lineas.slice(0, MAX_LINEAS);
-  // Array.from corta por letra completa: un emoji en el nombre nunca queda partido (eso sale como "�")
+  // Array.from corta por letra completa: un emoji en el nombre nunca queda partido (eso sale como " ")
   const corto = s => { const a = Array.from(String(s)); return a.length > MAX_LETRAS ? a.slice(0, MAX_LETRAS).join("").trim() + "…" : String(s); };
   let t = "Hola 👋 Quiero hacer este pedido:\n\n";
   t += "🛒 *PEDIDO #" + ref + "*\n\n";
@@ -1256,14 +1285,20 @@ function textoWhatsApp(ref, d, lineas, total, tasa, totalBs){
     t += "…y " + (lineas.length - mostrar.length) + " productos más (detalle completo en el pedido #" + ref + ")\n";
   t += "\n💵 *Total USD:* $" + usd(total) + "\n";
   t += "💱 *Tasa BCV:* " + usd(tasa) + "\n";
-  t += "💰 *Total Bs:* " + usd(totalBs) + "\n\n";
+  t += "💰 *Total Bs:* " + usd(totalBs) + "\n";
+  if (d.dlv > 0){
+    const tc = r2(total + d.dlv);
+    t += "🛵 *Delivery" + ((d.env || {}).ciudad ? " (" + d.env.ciudad + ")" : "") + ":* $" + usd(d.dlv) + " · Bs " + usd(r2(d.dlv * tasa)) + "\n";
+    t += "✅ *Total con delivery:* $" + usd(tc) + " · Bs " + usd(r2(tc * tasa)) + "\n";
+  }
+  t += "\n";
   t += "👤 *Cliente:* " + d.nom + " " + d.ape + " · " + d.tipo + "-" + d.ci + "\n";
   t += lineasEntrega(d);
   const tipoEnt = (d.env || {}).tipo;
   t += "\nQuedo atento para coordinar el pago" + (
     tipoEnt === "retiro"   ? " y el retiro." :
-    tipoEnt === "delivery" ? " y el costo del delivery." :
-    tipoEnt === "nacional" ? " y el costo del envío." :
+    tipoEnt === "delivery" ? (d.dlv > 0 ? " y la entrega." : " y el costo del delivery.") :
+    tipoEnt === "nacional" ? (entregaCfg().nacionalCobro === "cotizar" ? " y el costo del envío." : ". El envío lo pago al retirar en la agencia.") :
                              " y el costo de la entrega.") + " ¡Gracias!";
   return t;
 }
@@ -1312,11 +1347,12 @@ function enviarPedido(){
   const total   = r2(lineas.reduce((s, l) => s + l.sub, 0));
   const tasa    = Number(CAT.tasa) || 0;
   const totalBs = r2(total * tasa);
+  d.dlv = (d.env && d.env.tipo === "delivery") ? precioZona(d.env.ciudad) : 0;   // $ BCV que vio el comprador
 
   // 1) El pedido se guarda en este teléfono y se registra en ControlMaster por detrás.
   if (T.sistema){
     const pedido = { ref: ref, nombre: d.nom, apellido: d.ape, tipoDoc: d.tipo, cedula: d.ci,
-                     telefono: d.tel, entrega: d.dir, correo: d.correo, envio: d.env, sistema: T.sistema, total: total,
+                     telefono: d.tel, entrega: d.dir, correo: d.correo, envio: d.env, sistema: T.sistema, total: total, delivery: d.dlv,
                      items: lineas.map(l => ({ c: l.c, q: l.q, n: prod(l.c).n, p: l.pu })) };  // al sistema va el nombre tal cual está en el inventario
     guardarPendiente(pedido);
     registrar(pedido);
@@ -1353,7 +1389,9 @@ function mostrarFinal(ref, d, total, tasa, totalBs, url, abierto){
     <div class="r-l"><span>Cédula</span><span>${esc(d.tipo)}-${esc(d.ci)}</span></div>
     <div class="r-l"><span>Entrega</span><span>${esc(d.dir)}</span></div>
     <div class="r-l tot"><span>Total</span><span>$${usd(total)}</span></div>
-    <div class="r-l"><span>Tasa BCV ${usd(tasa)}</span><span>Bs ${usd(totalBs)}</span></div>`;
+    <div class="r-l"><span>Tasa BCV ${usd(tasa)}</span><span>Bs ${usd(totalBs)}</span></div>` +
+    (d.dlv > 0 ? `<div class="r-l"><span>Delivery</span><span>$${usd(d.dlv)} · Bs ${usd(r2(d.dlv * tasa))}</span></div>
+    <div class="r-l tot"><span>Total con delivery</span><span>$${usd(r2(total + d.dlv))} · Bs ${usd(r2((total + d.dlv) * tasa))}</span></div>` : "");
   const wa = $("btnWa");
   if (url){ wa.style.display = "flex"; wa.href = url; $("btnWaTxt").textContent = abierto ? "Abrir WhatsApp de nuevo" : "Abrir WhatsApp"; }
   else wa.style.display = "none";
@@ -1441,7 +1479,7 @@ function registrar(p){
   const cuerpo = JSON.stringify({ ref: p.ref, nombre: p.nombre, apellido: p.apellido, tipoDoc: p.tipoDoc,
                                   cedula: p.cedula, telefono: p.telefono, entrega: p.entrega,
                                   correo: p.correo || "", envio: p.envio || null, sistema: p.sistema || T.sistema,
-                                  total: p.total, items: p.items });
+                                  total: p.total, delivery: p.delivery, items: p.items });
   fetch(T.sistema, {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
