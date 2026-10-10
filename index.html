@@ -35,6 +35,8 @@ window.TIENDA = {
 };
 // ══════════════════════════════════════════════════════════════
 (function () {
+  if (window.TIENDA_SERVIDOR) Object.assign(window.TIENDA, window.TIENDA_SERVIDOR);   // ← lo llena el Worker de MiTiendaMaster
+  if (window.TIENDA.consulta) document.documentElement.classList.add("consulta");
   var T = window.TIENDA, q = new URLSearchParams(location.search);
   // Demo para prospectos (con el bloque vacío): ?c=<identificador>&s=<ID o URL del /exec>&n=<nombre>&tema=<tema>
   if (!T.cliente) T.cliente = (q.get("c") || "").toLowerCase().trim();
@@ -417,6 +419,8 @@ body.con-barra .pie-credito{padding-bottom:calc(92px + env(safe-area-inset-botto
   z-index:80;opacity:0;pointer-events:none;transition:.22s ease;box-shadow:0 8px 24px rgba(23,26,33,.25);max-width:90vw}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 @media(max-width:720px){body.con-barra #toast{bottom:calc(86px + env(safe-area-inset-bottom,0px))}}
+/* Modo consulta (no renovó): se ve el catálogo, sin carrito ni botones de pedido */
+.consulta .btn-carrito,.consulta .barra-pedido,.consulta .add,.consulta .gaveta{display:none!important}
 </style>
 </head>
 <body>
@@ -1099,6 +1103,10 @@ function ajustarCarrito(){
 // ══════════ PEDIDO ══════════
 function pedirDatos(){
   if (!Object.keys(carrito).length) return;
+  if (window.TIENDA.consulta){
+    aviso("Tienda en modo consulta", "Por ahora esta tienda no está recibiendo pedidos por aquí. Puedes ver los productos y los precios, y escribirle al negocio por WhatsApp.", "ℹ️");
+    return;
+  }
   if (CAT && CAT.activa === false){
     aviso("Tienda de demostración", "Esta tienda es una demostración: los pedidos están desactivados. Puedes ver los productos y los precios, pero todavía no se pueden enviar pedidos.", "ℹ️");
     return;
