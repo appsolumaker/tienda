@@ -22,6 +22,7 @@ window.TIENDA = {
   cliente:       "",     // ← identificador del cliente (Configuración H34)
   sistema:       "",     // ← URL /exec de ControlMaster del cliente
   whatsapp:      "",     // ← opcional: WhatsApp de la tienda (ej. 584141234567). Vacío = el de ControlMaster
+  ficha:         false,  // ← true = ficha de producto (servicio adicional). Con el Worker lo manda el KV TIENDAS ("ficha": true)
 
   // ── Aspecto ──
   tema:     "solumaker", // tema listo: solumaker · abasto · ferreteria · repuestos · comida · boutique
@@ -38,6 +39,7 @@ window.TIENDA = {
   if (window.TIENDA_SERVIDOR) Object.assign(window.TIENDA, window.TIENDA_SERVIDOR);   // ← lo llena el Worker de MiTiendaMaster
   if (window.TIENDA.consulta) document.documentElement.classList.add("consulta");
   var T = window.TIENDA, q = new URLSearchParams(location.search);
+  var demoEnlace = !T.cliente && !T.sistema;   // tienda armada solo con ?c= y ?s= (demo para prospectos)
   // Demo para prospectos (con el bloque vacío): ?c=<identificador>&s=<ID o URL del /exec>&n=<nombre>&tema=<tema>
   if (!T.cliente) T.cliente = (q.get("c") || "").toLowerCase().trim();
   if (!T.sistema) {
@@ -45,6 +47,8 @@ window.TIENDA = {
     T.sistema = !s ? "" : (s.indexOf("http") === 0 ? s : "https://script.google.com/macros/s/" + s + "/exec");
   }
   if (!T.negocio) T.negocio = (q.get("n") || "").trim();
+  if (demoEnlace && q.get("ficha") === "1") T.ficha = true;
+  if (T.ficha === true) document.documentElement.classList.add("con-ficha");
   T.fotos          = "https://fotos.micontrolmaster.com";
   T.logo           = T.cliente ? T.fotos + "/" + T.cliente + "/logo.webp" : "";
   T.logoBase       = T.logo;
@@ -419,6 +423,54 @@ body.con-barra .pie-credito{padding-bottom:calc(92px + env(safe-area-inset-botto
   z-index:80;opacity:0;pointer-events:none;transition:.22s ease;box-shadow:0 8px 24px rgba(23,26,33,.25);max-width:90vw}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 @media(max-width:720px){body.con-barra #toast{bottom:calc(86px + env(safe-area-inset-bottom,0px))}}
+/* ── Ficha de producto (servicio adicional) ── */
+html.con-ficha .card{cursor:pointer}
+.modal.ficha{left:0;right:0;top:auto;bottom:0;transform:none;width:100%;max-height:92vh;border-radius:22px 22px 0 0;overscroll-behavior:contain;padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(min-width:760px){.modal.ficha{left:50%;right:auto;top:50%;bottom:auto;transform:translate(-50%,-50%);width:min(920px,calc(100vw - 48px));max-height:88vh;border-radius:20px;padding-bottom:0}}
+.f-top{position:sticky;top:0;z-index:3;height:0;display:flex;justify-content:flex-end;gap:8px;padding:0 12px}
+.f-ico{margin-top:12px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.94);color:#171A21;box-shadow:0 2px 10px rgba(0,0,0,.18);display:grid;place-items:center;font-size:16px}
+.f-grid{display:block}
+@media(min-width:760px){.f-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;padding:24px;align-items:start}
+  .f-grid .fgal{grid-column:1}.f-grid .fgal-ths{grid-column:1;padding:0}.f-grid .f-info{grid-column:2;grid-row:1 / span 2;padding:8px 0 0}}
+.fgal{position:relative;background:#fff;overflow:hidden;border-radius:22px 22px 0 0}
+@media(min-width:760px){.fgal{border-radius:14px;border:1px solid var(--linea)}}
+.fgal-pista{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;aspect-ratio:1/1;-webkit-overflow-scrolling:touch}
+.fgal-pista::-webkit-scrollbar{display:none}
+.fgal-foto{flex:0 0 100%;scroll-snap-align:start;padding:0;border:0;background:#fff;cursor:zoom-in}
+.fgal-foto img{width:100%;height:100%;object-fit:contain;display:block}
+.fgal-foto.sinf{display:grid;place-items:center;color:var(--texto-2);background:var(--foto);cursor:default}
+.fgal-fl{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.92);color:#171A21;font-size:26px;line-height:1;box-shadow:0 3px 12px rgba(0,0,0,.18);display:none;place-items:center}
+.fgal-fl.izq{left:10px}.fgal-fl.der{right:10px}
+@media(min-width:760px){.fgal-fl{display:grid}}
+.fgal-puntos{position:absolute;left:0;right:0;bottom:10px;display:flex;justify-content:center;gap:6px;pointer-events:none}
+.fgal-puntos span{width:7px;height:7px;border-radius:999px;background:rgba(0,0,0,.22);transition:width .25s,background .25s}
+.fgal-puntos span.on{width:20px;background:var(--pri)}
+.fgal-ths{display:flex;gap:8px;overflow-x:auto;padding:10px 18px 0;scrollbar-width:none}
+.fgal-ths::-webkit-scrollbar{display:none}
+.fgal-th{flex:0 0 auto;width:58px;height:58px;padding:0;border:2px solid var(--linea);border-radius:10px;overflow:hidden;background:#fff}
+.fgal-th img{width:100%;height:100%;object-fit:contain;display:block}
+.fgal-th.on{border-color:var(--pri)}
+.f-info{padding:14px 18px 20px;display:flex;flex-direction:column;gap:8px}
+.f-marca{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--texto-2)}
+.f-nom{font-size:20px;font-weight:700;line-height:1.3;margin:0;letter-spacing:-.2px}
+.f-precio{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.f-bs{font-size:28px;font-weight:800;letter-spacing:-.5px;line-height:1.1}
+.f-usd{font-size:17px;font-weight:700;color:var(--texto-2)}
+.f-disp{display:inline-block;font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:var(--radio-chip)}
+.f-disp.si{background:#E7F6EC;color:#1F7A3E}.f-disp.poco{background:#FFF4D6;color:#6B4E00}.f-disp.no{background:#FDECE8;color:var(--rojo)}
+.f-acc{height:48px;margin-top:4px}
+.f-desc{white-space:pre-line;font-size:14.5px;line-height:1.6;margin:6px 0 0;padding-top:12px;border-top:1px solid var(--linea)}
+.f-cat{font-size:12.5px;color:var(--texto-2)}
+.f-bots{display:grid;gap:8px;margin-top:6px}
+.f-bots .btn-sec{margin-top:0}
+.visor{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.94);display:none;align-items:center;justify-content:center}
+.visor.on{display:flex}
+.visor img{max-width:100%;max-height:100%;object-fit:contain;touch-action:pinch-zoom}
+.visor .v-x{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:12px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:18px;display:grid;place-items:center}
+.visor .v-fl{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:30px;line-height:1;display:grid;place-items:center}
+.visor .v-fl.izq{left:10px}.visor .v-fl.der{right:10px}
+.visor .v-n{position:absolute;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:0;right:0;text-align:center;color:#fff;font-size:13px;font-weight:600}
+.consulta .f-acc{display:none!important}
 /* Modo consulta (no renovó): se ve el catálogo, sin carrito ni botones de pedido */
 .consulta .btn-carrito,.consulta .barra-pedido,.consulta .add,.consulta .gaveta{display:none!important}
 </style>
@@ -591,6 +643,24 @@ body.con-barra .pie-credito{padding-bottom:calc(92px + env(safe-area-inset-botto
     <p id="promoSinWa" style="display:none;font-size:13px;color:var(--texto-2);margin:0;">Escríbele a la tienda para pedir información de esta promoción.</p>
     <button class="btn-sec" onclick="cerrarTodo()">Seguir viendo productos</button>
   </div>
+</div>
+
+<!-- Ficha de producto (servicio adicional): se abre al tocar un producto -->
+<div class="modal ficha" id="mFicha" role="dialog" aria-label="Detalle del producto">
+  <div class="f-top">
+    <button class="f-ico" type="button" id="fCompartir" aria-label="Compartir producto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button>
+    <button class="f-ico" type="button" onclick="cerrarTodo()" aria-label="Cerrar">✕</button>
+  </div>
+  <div id="fichaCuerpo"></div>
+</div>
+
+<!-- Foto ampliada -->
+<div class="visor" id="visor" role="dialog" aria-label="Foto ampliada">
+  <img id="visorImg" alt="">
+  <button class="v-x" type="button" onclick="cerrarVisor()" aria-label="Cerrar">✕</button>
+  <button class="v-fl izq" type="button" onclick="verVisor(FICHA.vi-1)" aria-label="Foto anterior">‹</button>
+  <button class="v-fl der" type="button" onclick="verVisor(FICHA.vi+1)" aria-label="Foto siguiente">›</button>
+  <div class="v-n" id="visorN"></div>
 </div>
 
 <div class="modal" id="mAviso" role="alertdialog" aria-label="Aviso">
@@ -800,6 +870,8 @@ async function cargar(){
     }
   }
   reintentarPendientes();
+  cargarDetalles();
+  abrirFichaDelEnlace();
 }
 
 async function traerCatalogo(){
@@ -882,7 +954,7 @@ function filtrar(){
   else $("estado").style.display = "none";
   $("conteo").textContent = filtrados.length
     ? filtrados.length + (filtrados.length > 1 ? " productos" : " producto") + (categoria ? " en " + nombre(categoria) : "") +
-      (window.matchMedia && matchMedia("(pointer:coarse)").matches ? " · Toca dos veces un producto para agregarlo" : "")
+      (fichaActiva() ? " · Toca un producto para ver sus detalles" : (window.matchMedia && matchMedia("(pointer:coarse)").matches ? " · Toca dos veces un producto para agregarlo" : ""))
     : "";
   pintarLote();
 }
@@ -913,6 +985,7 @@ function accionHTML(p){
 function refrescarTarjeta(c){
   const p = prod(c);
   document.querySelectorAll('.card[data-c="' + CSS.escape(String(c)) + '"] .accion').forEach(a => { if (p) a.innerHTML = accionHTML(p); });
+  if (FICHA.c === String(c) && $("mFicha").classList.contains("on")) { const fa = $("fichaAccion"); if (fa && p) fa.innerHTML = accionHTML(p); }
 }
 
 function pintarLote(){
@@ -948,6 +1021,7 @@ $("rejilla").addEventListener("click", e => {
 // Los botones de la tarjeta no cuentan; si el dedo se movió (scroll), tampoco.
 let toqueAnt = { c: "", t: 0, x: 0, y: 0 };
 $("rejilla").addEventListener("pointerup", e => {
+  if (fichaActiva()) return;   // con la ficha, un toque abre la ficha
   if (e.pointerType === "mouse" && e.button !== 0) return;
   if (e.target.closest("button, a, input")) return;
   const card = e.target.closest(".card[data-c]");
@@ -967,6 +1041,167 @@ function agregarConToque(card, c){
   if ((carrito[c] || 0) <= antes) return;                  // no había más existencia (ya salió el aviso)
   if (antes) toast(num(carrito[c]) + " × " + p.nv.slice(0, 26) + (p.nv.length > 26 ? "…" : "") + " en tu pedido");
 }
+
+// ══════════ FICHA DE PRODUCTO (servicio adicional) ══════════
+// Se enciende con T.ficha = true (KV TIENDAS "ficha": true, o el bloque de configuración).
+// Apagada, la tienda queda exactamente igual. La descripción y las fotos extra vienen en
+// <cliente>/detalles.json, que se baja por detrás después del catálogo.
+const FICHA = { c: "", i: 0, v: [], vi: 0 };
+let DET = null, detPidiendo = false, fichaEnlaceHecho = false;
+const ICO_WA = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2zm0 18a8 8 0 01-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1112 20zm4.4-5.8c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 01-3.2-2.8c-.1-.2 0-.4.1-.5l.4-.5c.1-.2.1-.3 0-.5l-.7-1.6c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.5.1-.7.3a2.9 2.9 0 00-.9 2.1c0 1.3.9 2.5 1 2.6a10 10 0 003.9 3.4c1.8.7 1.8.5 2.2.5.3 0 1.2-.5 1.4-1 .2-.5.2-.9.1-1z"/></svg>';
+function fichaActiva(){ return T.ficha === true; }
+function baseUrl(u){ return String(u || "").split("?")[0]; }
+function fotoGrande(u){ return String(u || "").replace(/-400\.webp/, "-900.webp"); }
+function fotosDe(p){
+  const ex = ((DET && DET[p.c] && DET[p.c].f) || []).filter(u => baseUrl(u) !== baseUrl(p.i));
+  return (p.i ? [p.i] : []).concat(ex).slice(0, 5);
+}
+function enlaceProducto(c){
+  const u = new URL(location.href);
+  u.searchParams.set("p", c); u.hash = "";
+  return u.toString();
+}
+async function cargarDetalles(){
+  if (!fichaActiva() || detPidiendo) return;
+  if (!T.cliente){ DET = {}; return; }
+  detPidiendo = true;
+  try {
+    const r = await fetch(T.fotos + "/" + T.cliente + "/detalles.json", { cache: "no-cache" });
+    DET = r.ok ? (((await r.json()) || {}).p || {}) : (DET || {});
+  } catch(e) { if (!DET) DET = {}; }
+  detPidiendo = false;
+  if ($("mFicha").classList.contains("on") && FICHA.c) pintarFicha(FICHA.c);
+}
+function abrirFicha(c){
+  const p = prod(c); if (!p) return;
+  FICHA.c = p.c; FICHA.i = 0;
+  pintarFicha(p.c);
+  $("mFicha").classList.add("on");
+  $("velo").classList.add("on");
+  $("mFicha").scrollTop = 0;
+  // Mientras la ficha está abierta, la dirección del navegador lleva ?p= (se pone después de que se anota la capa del botón Atrás)
+  setTimeout(() => { try { history.replaceState(history.state, "", enlaceProducto(p.c)); } catch(e) {} }, 0);
+}
+function pintarFicha(c){
+  const p = prod(c); if (!p) return;
+  const fotos = fotosDe(p), n = fotos.length, varias = n > 1;
+  if (FICHA.i > n - 1) FICHA.i = 0;
+  const tasa = CAT ? Number(CAT.tasa) || 0 : 0;
+  const det = DET ? (DET[p.c] || {}) : null;
+  const disp = p.e === 0 ? '<span class="f-disp no">Agotado</span>'
+             : p.e === 1 ? '<span class="f-disp poco">Quedan ' + num(p.m) + (Number(p.m) === 1 ? ' unidad' : ' unidades') + '</span>'
+             : '<span class="f-disp si">Disponible</span>';
+  const fotosHTML = n
+    ? fotos.map((u, i) => '<button class="fgal-foto" type="button" data-foto="' + i + '" aria-label="Ampliar foto ' + (i + 1) + '">' +
+        '<img src="' + esc(fotoGrande(u)) + '" data-m="' + esc(u) + '" onerror="this.onerror=null;this.src=this.dataset.m" alt="' + esc(p.nv) + '"' + (i ? ' loading="lazy"' : '') + ' decoding="async"></button>').join("")
+    : '<div class="fgal-foto sinf">Sin foto</div>';
+  const wa = numeroWhatsApp();
+  $("fichaCuerpo").innerHTML =
+    '<div class="f-grid">' +
+      '<div class="fgal">' +
+        '<div class="fgal-pista" id="fPista">' + fotosHTML + '</div>' +
+        (varias ? '<button class="fgal-fl izq" type="button" data-mover="-1" aria-label="Foto anterior">‹</button>' +
+                  '<button class="fgal-fl der" type="button" data-mover="1" aria-label="Foto siguiente">›</button>' +
+                  '<div class="fgal-puntos" id="fPuntos">' + fotos.map((_, i) => '<span' + (i === 0 ? ' class="on"' : '') + '></span>').join("") + '</div>' : '') +
+      '</div>' +
+      (varias ? '<div class="fgal-ths" id="fThs">' + fotos.map((u, i) => '<button class="fgal-th' + (i === 0 ? ' on' : '') + '" type="button" data-ir="' + i + '" aria-label="Ver foto ' + (i + 1) + '"><img src="' + esc(u) + '" alt="" loading="lazy"></button>').join("") + '</div>' : '') +
+      '<div class="f-info">' +
+        (p.b ? '<div class="f-marca">' + esc(p.b) + '</div>' : '') +
+        '<h2 class="f-nom">' + esc(p.nv) + '</h2>' +
+        '<div class="f-precio">' + (tasa > 0 ? '<span class="f-bs">Bs ' + bs(p.p) + '</span><span class="f-usd">$' + usd(p.p) + '</span>' : '<span class="f-bs">$' + usd(p.p) + '</span>') + '</div>' +
+        '<div>' + disp + '</div>' +
+        '<div class="accion f-acc" id="fichaAccion">' + accionHTML(p) + '</div>' +
+        (det === null ? '<div class="esq-l" style="width:85%;margin-top:10px"></div><div class="esq-l" style="width:60%"></div>'
+                      : (det.d ? '<p class="f-desc">' + esc(det.d) + '</p>' : '')) +
+        (p.g && p.g !== SIN_CATEGORIA ? '<div class="f-cat">Categoría: ' + esc(nombre(p.g)) + '</div>' : '') +
+        '<div class="f-bots">' +
+          (wa ? '<a class="btn-wa" id="fPreguntar" href="#" target="_blank" rel="noopener">' + ICO_WA + ' Preguntar por este producto</a>' : '') +
+          '<button class="btn-sec" type="button" id="fCompartir2">Compartir este producto</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  if (wa){
+    const msj = "Hola, quiero información de este producto:\n" + p.nv + " — " + (tasa > 0 ? "Bs " + bs(p.p) + " · " : "") + "$" + usd(p.p) + "\n" + enlaceProducto(p.c);
+    const a = $("fPreguntar");
+    a.href = "https://wa.me/" + wa + "?text=" + encodeURIComponent(msj);
+    if (MOVIL) a.removeAttribute("target");
+  }
+  const pista = $("fPista");
+  if (varias && pista) pista.addEventListener("scroll", () => {
+    const i = Math.round(pista.scrollLeft / Math.max(1, pista.clientWidth));
+    if (i === FICHA.i) return;
+    FICHA.i = i;
+    document.querySelectorAll("#fPuntos span").forEach((s, k) => s.classList.toggle("on", k === i));
+    document.querySelectorAll("#fThs .fgal-th").forEach((t, k) => t.classList.toggle("on", k === i));
+  }, { passive: true });
+}
+function irFoto(i){
+  const pista = $("fPista"), p = prod(FICHA.c); if (!pista || !p) return;
+  const n = fotosDe(p).length; if (n < 2) return;
+  pista.scrollTo({ left: ((i % n) + n) % n * pista.clientWidth, behavior: "smooth" });
+}
+async function compartirProducto(){
+  const p = prod(FICHA.c); if (!p) return;
+  const url = enlaceProducto(p.c), tasa = CAT ? Number(CAT.tasa) || 0 : 0;
+  const txt = p.nv + " — " + (tasa > 0 ? "Bs " + bs(p.p) + " · " : "") + "$" + usd(p.p);
+  if (navigator.share){
+    try { await navigator.share({ title: p.nv, text: txt, url: url }); return; }
+    catch(e) { if (e && e.name === "AbortError") return; }
+  }
+  const w = "https://wa.me/?text=" + encodeURIComponent(txt + "\n" + url);
+  if (MOVIL) location.href = w; else window.open(w, "_blank");
+}
+// Foto ampliada
+function abrirVisor(i){
+  const p = prod(FICHA.c); if (!p) return;
+  FICHA.v = fotosDe(p); if (!FICHA.v.length) return;
+  verVisor(i);
+  $("visor").classList.add("on");
+}
+function verVisor(i){
+  const L = FICHA.v || [], n = L.length; if (!n) return;
+  FICHA.vi = ((i % n) + n) % n;
+  const img = $("visorImg");
+  img.dataset.m = L[FICHA.vi];
+  img.onerror = function(){ this.onerror = null; this.src = this.dataset.m; };
+  img.src = fotoGrande(L[FICHA.vi]);
+  $("visorN").textContent = n > 1 ? (FICHA.vi + 1) + " de " + n : "";
+  document.querySelectorAll("#visor .v-fl").forEach(b => b.style.display = n > 1 ? "" : "none");
+}
+function cerrarVisor(){ $("visor").classList.remove("on"); }
+// Enlace ?p=<código>: abre la ficha de ese producto una sola vez al entrar
+function abrirFichaDelEnlace(){
+  if (fichaEnlaceHecho || !CAT) return;
+  fichaEnlaceHecho = true;
+  const c = (new URLSearchParams(location.search).get("p") || "").trim();
+  if (!c) return;
+  try { const u = new URL(location.href); u.searchParams.delete("p"); history.replaceState(history.state, "", u.toString()); } catch(e) {}
+  if (!fichaActiva()) return;
+  if (prod(c)) abrirFicha(c);
+  else aviso("Producto no disponible", "El producto de ese enlace ya no está en la tienda. Puedes ver todos los demás aquí.", "ℹ️");
+}
+// Toques: en la tarjeta (fuera de los botones) abre la ficha; dentro de la ficha, sus botones
+$("rejilla").addEventListener("click", e => {
+  if (!fichaActiva() || e.target.closest("button, a, input")) return;
+  const card = e.target.closest(".card[data-c]");
+  if (card) abrirFicha(card.dataset.c);
+});
+$("mFicha").addEventListener("click", e => {
+  const acc = e.target.closest("button[data-acc]");
+  if (acc){ if (!acc.disabled){ if (acc.dataset.acc === "mas") agregar(acc.dataset.c); else cambiar(acc.dataset.c, -1); } return; }
+  const f = e.target.closest("[data-foto]"); if (f){ abrirVisor(Number(f.dataset.foto)); return; }
+  const th = e.target.closest("[data-ir]"); if (th){ irFoto(Number(th.dataset.ir)); return; }
+  const mv = e.target.closest("[data-mover]"); if (mv){ irFoto(FICHA.i + Number(mv.dataset.mover)); return; }
+  if (e.target.closest("#fCompartir, #fCompartir2")) compartirProducto();
+});
+$("visor").addEventListener("click", e => { if (e.target.id === "visor") cerrarVisor(); });
+let _vx = null;
+$("visor").addEventListener("touchstart", e => { _vx = e.touches.length === 1 ? e.touches[0].clientX : null; }, { passive: true });
+$("visor").addEventListener("touchend", e => {
+  if (_vx === null) return;
+  const dx = e.changedTouches[0].clientX - _vx; _vx = null;
+  if (Math.abs(dx) > 50) verVisor(FICHA.vi + (dx < 0 ? 1 : -1));
+}, { passive: true });
 
 window.addEventListener("scroll", () => {
   if (!CAT || pintados >= filtrados.length) return;
@@ -1523,7 +1758,7 @@ function aviso(tit, html, ico){
 }
 function cerrarAviso(){
   $("mAviso").classList.remove("on");
-  if (!document.querySelector(".gaveta.on, #mDatos.on, #mFinal.on, #mPromo.on")) $("velo").classList.remove("on");
+  if (!document.querySelector(".gaveta.on, #mDatos.on, #mFinal.on, #mPromo.on, #mFicha.on")) $("velo").classList.remove("on");
 }
 function cerrarModales(){
   $("mDatos").classList.remove("on");
@@ -1532,6 +1767,7 @@ function cerrarModales(){
 }
 function cerrarTodo(){
   document.querySelectorAll(".gaveta,.modal").forEach(e => e.classList.remove("on"));
+  $("visor").classList.remove("on");
   $("velo").classList.remove("on");
 }
 
@@ -1547,7 +1783,14 @@ document.addEventListener("wheel", e => {
   const a = document.activeElement;
   if (a && a.type === "number" && a === e.target) a.blur();
 }, { passive: true });
-document.addEventListener("keydown", e => { if (e.key === "Escape") cerrarTodo(); });
+document.addEventListener("keydown", e => {
+  const visor = $("visor").classList.contains("on");
+  if (e.key === "Escape"){ if (visor) cerrarVisor(); else cerrarTodo(); return; }
+  if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+  const d = e.key === "ArrowRight" ? 1 : -1;
+  if (visor) verVisor(FICHA.vi + d);
+  else if ($("mFicha").classList.contains("on")) irFoto(FICHA.i + d);
+});
 
 cargar();
 </script>
