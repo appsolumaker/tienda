@@ -463,6 +463,10 @@ html.con-ficha .card{cursor:pointer}
 .f-cat{font-size:12.5px;color:var(--texto-2)}
 .f-bots{display:grid;gap:8px;margin-top:6px}
 .f-bots .btn-sec{margin-top:0}
+.f-compartir{width:100%;height:46px;display:flex;align-items:center;justify-content:center;gap:9px;border:1.5px solid var(--pri);border-radius:var(--radio-btn);background:var(--pri-suave);color:var(--pri-sobre-suave);font-weight:800;font-size:14.5px;transition:background .15s,transform .1s}
+.f-compartir:hover{background:var(--carta)}
+.f-compartir:active{transform:scale(.98)}
+.f-compartir svg{flex:0 0 auto}
 .visor{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.94);display:none;align-items:center;justify-content:center}
 .visor.on{display:flex}
 .visor img{max-width:100%;max-height:100%;object-fit:contain;touch-action:pinch-zoom}
@@ -995,7 +999,7 @@ function pintarLote(){
     d.className = "card" + (p.e === 0 ? " sin" : "");
     d.dataset.c = p.c;
     const etq = p.e === 0 ? '<span class="etq no">Agotado</span>'
-              : p.e === 1 ? '<span class="etq poco">Últimas unidades</span>' : "";
+              : p.e === 1 ? '<span class="etq poco">🔥 Últimas unidades</span>' : "";
     d.innerHTML = `
       <div class="foto-caja">${imagen(p)}${etq}</div>
       <div class="card-b">
@@ -1089,7 +1093,7 @@ function pintarFicha(c){
   const tasa = CAT ? Number(CAT.tasa) || 0 : 0;
   const det = DET ? (DET[p.c] || {}) : null;
   const disp = p.e === 0 ? '<span class="f-disp no">Agotado</span>'
-             : p.e === 1 ? '<span class="f-disp poco">Quedan ' + num(p.m) + (Number(p.m) === 1 ? ' unidad' : ' unidades') + '</span>'
+             : p.e === 1 ? '<span class="f-disp poco">🔥 Quedan ' + num(p.m) + (Number(p.m) === 1 ? ' unidad' : ' unidades') + '</span>'
              : '<span class="f-disp si">Disponible</span>';
   const fotosHTML = n
     ? fotos.map((u, i) => '<button class="fgal-foto" type="button" data-foto="' + i + '" aria-label="Ampliar foto ' + (i + 1) + '">' +
@@ -1115,17 +1119,10 @@ function pintarFicha(c){
                       : (det.d ? '<p class="f-desc">' + esc(det.d) + '</p>' : '')) +
         (p.g && p.g !== SIN_CATEGORIA ? '<div class="f-cat">Categoría: ' + esc(nombre(p.g)) + '</div>' : '') +
         '<div class="f-bots">' +
-          (wa ? '<a class="btn-wa" id="fPreguntar" href="#" target="_blank" rel="noopener">' + ICO_WA + ' Preguntar por este producto</a>' : '') +
-          '<button class="btn-sec" type="button" id="fCompartir2">Compartir este producto</button>' +
+          '<button class="f-compartir" type="button" id="fCompartir2"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> Compartir este producto</button>' +
         '</div>' +
       '</div>' +
     '</div>';
-  if (wa){
-    const msj = "Hola, quiero información de este producto:\n" + p.nv + " — " + (tasa > 0 ? "Bs " + bs(p.p) + " · " : "") + "$" + usd(p.p) + "\n" + enlaceProducto(p.c);
-    const a = $("fPreguntar");
-    a.href = "https://wa.me/" + wa + "?text=" + encodeURIComponent(msj);
-    if (MOVIL) a.removeAttribute("target");
-  }
   const pista = $("fPista");
   if (varias && pista) pista.addEventListener("scroll", () => {
     const i = Math.round(pista.scrollLeft / Math.max(1, pista.clientWidth));
@@ -1148,7 +1145,8 @@ async function compartirProducto(){
     try { await navigator.share({ title: p.nv, text: txt, url: url }); return; }
     catch(e) { if (e && e.name === "AbortError") return; }
   }
-  const w = "https://wa.me/?text=" + encodeURIComponent(txt + "\n" + url);
+  try { await navigator.clipboard.writeText(url); toast("Enlace del producto copiado"); return; } catch(e) {}
+     const w = "https://wa.me/?text=" + encodeURIComponent(txt + "\n" + url);
   if (MOVIL) location.href = w; else window.open(w, "_blank");
 }
 // Foto ampliada
